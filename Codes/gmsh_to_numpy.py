@@ -1,6 +1,7 @@
 import gmsh
 import numpy as np
 
+# from gmsh-stype to numpy-style
 def gmsh_tag_transform():
     # nodeTags: node ID list
     # nodeCoords: [x1, y1, z1, x2, y2, z2, ...] flattened list
@@ -12,18 +13,18 @@ def gmsh_tag_transform():
     # Mirror relation： Gmsh tag -> Python index; Gmsh tag may not continuous
     node_index = {tag: i for i, tag in enumerate(node_tag)}
 
-    elementTypes, elementTags, nodeTagsPerEl = gmsh.model.mesh.getElements(dim=3)
+    element_types, element_tags, node_tags_per_element = gmsh.model.mesh.getElements(dim=3)
     # print(gmsh.model.mesh.getElements(dim=3))
     # print(type(elementTypes))
     # print(elementTags)
     # print(nodeTagsPerEl)
 
     # 4 means tetrahedral (4 nodes)
-    if 4 not in elementTypes:
+    if 4 not in element_types:
         raise ValueError("No tetrahedron found! Please check if 3D mesh was generated.")
 
-    tetra_index = elementTypes.tolist().index(4)
-    tetra_nodes_tags = np.array(nodeTagsPerEl[tetra_index], dtype=np.int64).reshape(-1, 4)
+    tetra_index = element_types.tolist().index(4)
+    tetra_nodes_tags = np.array(node_tags_per_element[tetra_index], dtype=np.int64).reshape(-1, 4)
     print(tetra_nodes_tags)
 
     # mirroring gmsh coordinate into pytorch coordinate

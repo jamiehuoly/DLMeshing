@@ -31,9 +31,13 @@ tetra_index = elementTypes.tolist().index(4)
 tetra_nodes_tags = np.array(nodeTagsPerEl[tetra_index], dtype=np.int64).reshape(-1, 4)
 print(tetra_nodes_tags)
 
-elems_numpy = np.array([
-    [node_index[tag] for tag in tetra]
-    for tetra in tetra_nodes_tags
-], dtype=np.int64)
+# mirroring gmsh coordinate into pytorch coordinate
+elems_numpy = np.zeros_like(tetra_nodes_tags)
+
+for i in range(tetra_nodes_tags.shape[0]):
+    for j in range(tetra_nodes_tags.shape[1]):
+        gmsh_tag = tetra_nodes_tags[i, j]
+        python_index = node_index[gmsh_tag]
+        elems_numpy[i, j] = python_index
 
 print(f"提取完成: {coordinate.shape[0]} Nodes, {elems_numpy.shape[0]} Tetras")

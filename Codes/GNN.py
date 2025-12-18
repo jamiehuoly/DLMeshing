@@ -16,7 +16,7 @@ class MeshOptimizerGNN(nn.Module):
         # Processor: 多层消息传递 (Message Passing)
         # 这里可以使用 EdgeConv 或 GAT，捕捉局部拓扑结构
         self.layers = nn.ModuleList()
-        for _ in range(5):  # 5-8层通常足够
+        for _ in range(5):
             self.layers.append(
                 EdgeConv(nn.Sequential(
                     nn.Linear(2 * hidden_channels, hidden_channels),
@@ -47,7 +47,7 @@ class MeshOptimizerGNN(nn.Module):
         # 3. Decoding
         displacement = self.decoder(h)
 
-        # 4. Hard Constraint: 强制边界节点不移动 (或者由后处理处理)
+        # 4. Hard Constraint: 强制边界节点不移动
         # mask = x[:, is_boundary_idx] == 0
         # displacement = displacement * mask
 

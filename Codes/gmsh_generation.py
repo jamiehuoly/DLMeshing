@@ -40,4 +40,4 @@ for i in range(tetra_nodes_tags.shape[0]):
         python_index = node_index[gmsh_tag]
         elems_numpy[i, j] = python_index
 
-print(f"提取完成: {coordinate.shape[0]} Nodes, {elems_numpy.shape[0]} Tetras")
+print(f"Finished transferring: {coordinate.shape[0]} Nodes, {elems_numpy.shape[0]} Tetras")

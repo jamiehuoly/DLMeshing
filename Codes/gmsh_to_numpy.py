@@ -3,8 +3,8 @@ import numpy as np
 
 # from gmsh-stype to numpy-style
 def gmsh_tag_transform():
-    # nodeTags: node ID list
-    # nodeCoords: [x1, y1, z1, x2, y2, z2, ...] flattened list
+    # node_tag: node ID list
+    # coordinate: [x1, y1, z1, x2, y2, z2, ...] flattened list
     node_tag, coordinate, _ = gmsh.model.mesh.getNodes()
 
     # reshape to 3-dimension
@@ -29,7 +29,6 @@ def gmsh_tag_transform():
 
     # mirroring gmsh coordinate into pytorch coordinate
     elems_numpy = np.zeros_like(tetra_nodes_tags)
-
     for i in range(tetra_nodes_tags.shape[0]):
         for j in range(tetra_nodes_tags.shape[1]):
             gmsh_tag = tetra_nodes_tags[i, j]

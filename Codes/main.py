@@ -22,7 +22,8 @@ print(is_undirected(edges_index))
 
 graph_data = utils.create_tg_data(coordinate, edges_index)
 print(edges_index)
+print(edges_index.shape)
 print(graph_data)
 
 
-
+# To do: loss function define & model initialising & training

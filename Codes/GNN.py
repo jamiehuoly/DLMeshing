@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 
+## To Do: adding velocity gradient input
+
 class GNN(MessagePassing):
     def __init__(self, in_channels, out_channels, num_layers, hidden_layer_dim=32,
                  dropout=0.1, **kwargs):

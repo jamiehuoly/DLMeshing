@@ -27,3 +27,4 @@ print(graph_data)
 
 
 # To do: loss function define & model initialising & training
+# To do: Hardware detect algorithm (GPU/CPU)

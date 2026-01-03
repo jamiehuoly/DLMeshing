@@ -15,10 +15,14 @@ coordinate, elems_numpy = utils.gmsh_tag_transform()
 # print(coordinate.shape)
 
 # 3. build torch_geometric data for NN
-edges_index = utils.get_graph_edges(coordinate, elems_numpy)
+edges_index = utils.get_tetrahedral_edges(coordinate, elems_numpy)
 print(is_undirected(edges_index))
 
-graph_data = utils.create_tg_data(coordinate, edges_index)
+# 4. stack u v w p into the list
+features_7d = utils.enrich_features(coordinate, "to/be/filled/path")
+
+# 5. create Data object
+graph_data = utils.create_tg_data(features_7d, edges_index)
 print(edges_index)
 print(edges_index.shape)
 print(graph_data)

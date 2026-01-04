@@ -1,3 +1,4 @@
+import sys
 import gmsh
 import numpy as np
 import torch
@@ -9,6 +10,36 @@ def create_tg_data(x_features, edge_index):
     coordinate_tensor = torch.tensor(x_features, dtype=torch.float)
     graph_data = Data(x=coordinate_tensor, edge_index=edge_index)
     return graph_data
+
+def gmsh_open(filename):
+    try:
+        gmsh.open(filename)
+    except:
+        print(f"Cannot find file: {filename}")
+        gmsh.finalize()
+        sys.exit()
+
+def define_mesh_boundaries(surfaces):
+    inlet_tmp = []
+    outlet_tmp = []
+    wall_tmp = []
+    TOL = 1e-4
+    for s in surfaces:
+        tag = s[1]
+        geometry_type = gmsh.model.getType(2, tag)
+        centroid = gmsh.model.occ.getCenterOfMass(2, tag)
+        # Here we are assuming all cases are vascular cases, there should only be 2 planes
+        if geometry_type == "Plane":
+            x, y, z = centroid[0], centroid[1], centroid[2]
+            if abs(x) < TOL or abs(y) < TOL or abs(z) < TOL:
+                print(f"-> 发现 Inlet (ID {tag}): 位于 {centroid} (坐标轴面上)")
+                inlet_tmp.append(tag)
+            else:
+                print(f"-> 发现 Outlet (ID {tag}): 位于 {centroid}")
+                outlet_tmp.append(tag)
+        else:
+            wall_tmp.append(tag)
+    return inlet_tmp, outlet_tmp, wall_tmp
 
 # from gmsh-stype to numpy-style
 def gmsh_tag_transform():

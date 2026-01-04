@@ -50,6 +50,7 @@ gmsh.option.setNumber("Mesh.Binary", 0) # 0 表示 ASCII
 gmsh.write("elbow.msh")
 
 # 2. transformed results
+### should be sure that the coordinates will be consistent to the CFD results
 coordinate, elems_numpy = utils.gmsh_tag_transform()
 # print(coordinate, elems_numpy)
 # print(coordinate.shape)

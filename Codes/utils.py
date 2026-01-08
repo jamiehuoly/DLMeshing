@@ -11,6 +11,30 @@ def create_tg_data(x_features, edge_index):
     graph_data = Data(x=coordinate_tensor, edge_index=edge_index)
     return graph_data
 
+def add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes):
+    if inlet_tags:
+        gmsh.model.addPhysicalGroup(2, inlet_tags, tag=1, name="inlet")
+    if outlet_tags:
+        gmsh.model.addPhysicalGroup(2, outlet_tags, tag=2, name="outlet")
+    if wall_tags:
+        gmsh.model.addPhysicalGroup(2, wall_tags, tag=3, name="wall")
+
+    if not volumes:
+        print("No volumes found in model, please check!")
+        gmsh.finalize()
+        return False
+    volume_tags = [v[1] for v in volumes]
+    gmsh.model.addPhysicalGroup(3, volume_tags, tag=100, name="fluid")
+    return True
+
+def gmsh_option_setting():
+    gmsh.option.setNumber("Mesh.ElementOrder", 1)
+    gmsh.option.setNumber("Mesh.MeshSizeFactor", 0.5)
+    gmsh.option.setNumber("Mesh.Optimize", 1)
+    gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
+    gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
+    gmsh.option.setNumber("Mesh.Binary", 0)  # 0 表示 ASCII
+
 def gmsh_open(filename):
     try:
         gmsh.open(filename)

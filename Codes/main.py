@@ -7,6 +7,8 @@ from torch_geometric.utils import is_undirected
 
 import utils
 
+GENERATE_FINE_MESH = True
+
 # 1. model import and initial 3D mesh generation
 gmsh.initialize()
 gmsh.model.add("elbow")
@@ -15,38 +17,29 @@ utils.gmsh_open("elbow.step")
 # gmsh.fltk.run()
 gmsh.model.occ.synchronize()
 surfaces = gmsh.model.getEntities(2)
+volumes = gmsh.model.getEntities(3)
 
 # Define Boundaries
 inlet_tags, outlet_tags, wall_tags = utils.define_mesh_boundaries(surfaces)
 
 # Define Physical Groups
-## Inlet & Outlet
-if inlet_tags:
-    gmsh.model.addPhysicalGroup(2, inlet_tags, tag=1, name="inlet")
-if outlet_tags:
-    gmsh.model.addPhysicalGroup(2, outlet_tags, tag=2, name="outlet")
-if wall_tags:
-    gmsh.model.addPhysicalGroup(2, wall_tags, tag=3, name="wall")
+## Inlet, Outlet, wall, flow field
+res = utils.add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes)
+if not res:
+    print("error when adding physical group, system exit!")
+    sys.exit(0)
 
-## Entire 3D Flow Field
-volumes = gmsh.model.getEntities(3)
-if not volumes:
-    print("No volumes found in model, please check!")
-    gmsh.finalize()
-    sys.exit()
-volume_tags = [v[1] for v in volumes]
-gmsh.model.addPhysicalGroup(3, volume_tags, tag=100, name="fluid")
+utils.gmsh_option_setting()
 
-gmsh.option.setNumber("Mesh.ElementOrder", 1)
-gmsh.option.setNumber("Mesh.MeshSizeFactor", 0.5)
-gmsh.option.setNumber("Mesh.Optimize", 1)
-gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
+# if GENERATE_FINE_MESH:
+#     # get model edges
+#     bbox = gmsh.model.getBoundingBox(-1, -1)
+#
+#     xmin, ymin, zmin = bbox[0], bbox[1], bbox[2]
+#     xmax, ymax, zmax = bbox[3], bbox[4], bbox[5]
 
 print("Generating 3D mesh...")
 gmsh.model.mesh.generate(3)
-
-gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
-gmsh.option.setNumber("Mesh.Binary", 0) # 0 表示 ASCII
 gmsh.write("elbow.msh")
 
 # 2. transformed results

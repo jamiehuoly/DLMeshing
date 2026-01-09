@@ -29,7 +29,6 @@ def add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes):
 
 def gmsh_option_setting():
     gmsh.option.setNumber("Mesh.ElementOrder", 1)
-    gmsh.option.setNumber("Mesh.MeshSizeFactor", 0.5)
     gmsh.option.setNumber("Mesh.Optimize", 1)
     gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
     gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)

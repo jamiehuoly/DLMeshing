@@ -34,15 +34,15 @@ utils.gmsh_option_setting()
 
 if GENERATE_FINE_MESH:
     # refinement parameters / characteristic length
-    LC_FINE = 1.2 # fine section
+    LC_FINE = 1.1 # fine section
     LC_COARSE = 4.2  # coarse section
 
     # let 30% coarse, 70% fine
     bbox = gmsh.model.getBoundingBox(-1, -1)
     ymin, ymax = bbox[1], bbox[4]
     zmin, zmax = bbox[2], bbox[5]
-    yaxis_refine_cutoff = ymax + (ymin - ymax) * 0.2 # the y-coordinate is inversed
-    zaxis_refine_cutoff = zmin + (zmax - zmin) * 0.2
+    yaxis_refine_cutoff = ymax + (ymin - ymax) * 0.1 # the y-coordinate is inversed
+    zaxis_refine_cutoff = zmin + (zmax - zmin) * 0.1
 
     # obtain all points and their information
     all_geometric_points = gmsh.model.getEntities(0)

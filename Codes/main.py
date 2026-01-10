@@ -34,7 +34,7 @@ utils.gmsh_option_setting()
 
 if GENERATE_FINE_MESH:
     # refinement parameters / characteristic length
-    LC_FINE = 1  # fine section
+    LC_FINE = 1.5 # fine section
     LC_COARSE = 4.5  # coarse section
 
     # let 30% coarse, 70% fine

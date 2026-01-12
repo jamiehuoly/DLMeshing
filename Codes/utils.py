@@ -101,6 +101,22 @@ def gmsh_tag_transform():
     print(f"Finished transferring: {coordinate.shape[0]} Nodes, {elems_numpy.shape[0]} Tetras")
     return coordinate, elems_numpy
 
+def get_refine_coarse_points(all_geometric_points, yaxis_refine_cutoff, zaxis_refine_cutoff):
+    points_to_refine = []
+    points_to_coarsen = []
+    for dim, tag in all_geometric_points:
+        # obtain coordinates of all points
+        coord = gmsh.model.getValue(dim, tag, [])
+        y_coord = coord[1]
+        z_coord = coord[2]
+
+        # select the nodes in the refinement area
+        if z_coord > zaxis_refine_cutoff and y_coord < yaxis_refine_cutoff:
+            points_to_refine.append((dim, tag))
+        else:
+            points_to_coarsen.append((dim, tag))
+    return points_to_refine, points_to_coarsen
+
 def get_tetrahedral_edges(coordinate, elems_numpy):
     # tetrahedral edges combinations
     all_edges = []

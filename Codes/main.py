@@ -30,39 +30,26 @@ if not res:
     print("error when adding physical group, system exit!")
     sys.exit(0)
 
+# Gmsh universal settings
 utils.gmsh_option_setting()
 
 if GENERATE_FINE_MESH:
     # refinement parameters / characteristic length
     LC_FINE = 1.1 # fine section
     LC_COARSE = 4.2  # coarse section
+    proportion = 0.1
 
-    # let 30% coarse, 70% fine
+    # Refinement starts 10% away from inlet/outlet
     bbox = gmsh.model.getBoundingBox(-1, -1)
     ymin, ymax = bbox[1], bbox[4]
     zmin, zmax = bbox[2], bbox[5]
-    yaxis_refine_cutoff = ymax + (ymin - ymax) * 0.1 # the y-coordinate is inversed
-    zaxis_refine_cutoff = zmin + (zmax - zmin) * 0.1
+    yaxis_refine_cutoff = ymax + (ymin - ymax) * proportion # the y-coordinate is inversed
+    zaxis_refine_cutoff = zmin + (zmax - zmin) * proportion
 
     # obtain all points and their information
     all_geometric_points = gmsh.model.getEntities(0)
-
-    points_to_refine = []
-    points_to_coarsen = []
-
-    print(f"检测到模型共有 {len(all_geometric_points)} 个几何顶点。")
-
-    for dim, tag in all_geometric_points:
-        # obtain coordinates of all points
-        coord = gmsh.model.getValue(dim, tag, [])
-        y_coord = coord[1]
-        z_coord = coord[2]
-
-        # select the nodes in the refinement area
-        if z_coord > zaxis_refine_cutoff and y_coord < yaxis_refine_cutoff:
-            points_to_refine.append((dim, tag))
-        else:
-            points_to_coarsen.append((dim, tag))
+    points_to_refine, points_to_coarsen = utils.get_refine_coarse_points(all_geometric_points,
+                                                                         yaxis_refine_cutoff, zaxis_refine_cutoff)
 
     # use gmsh setSize to set the characteristic length of nodes in refinement section
     if points_to_refine:

@@ -1,7 +1,7 @@
 DLMeshing Project
 
 Elbow Model:
-![Model Image.png](Model%20Image.png)
+![Elbow Model Image.png](Elbow%20Model%20Image.png)
 
 3D Tetrahedral Coarse Mesh
 ![Mesh Image.png](Mesh%20Image.png)

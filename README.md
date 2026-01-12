@@ -9,5 +9,5 @@ Elbow Model:
 Manually Refined Mesh by Gmsh
 ![Manually Refined Mesh by Gmsh.png](Manually%20Refined%20Mesh%20by%20Gmsh.png)
 
-Simulation Results of Manually Refined Case
+Simulation Results of Manually Refined Case (Velocity U)
 ![Simulation Results of Manually Refined Case.png](Simulation%20Results%20of%20Manually%20Refined%20Case.png)

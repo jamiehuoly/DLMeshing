@@ -35,6 +35,7 @@ utils.gmsh_option_setting()
 
 if GENERATE_FINE_MESH:
     # refinement parameters / characteristic length
+    # gmsh does not care about units, it only cares about magnitude
     LC_FINE = 1.1 # fine section
     LC_COARSE = 4.2  # coarse section
     proportion = 0.1

@@ -35,9 +35,9 @@ utils.gmsh_option_setting()
 
 if GENERATE_FINE_MESH:
     # refinement parameters / characteristic length
-    LC_FINE = 1.1 # fine section
-    LC_COARSE = 4.2  # coarse section
-    proportion = 0.1
+    LC_FINE = 1.0 # fine section
+    LC_COARSE = 5  # coarse section
+    proportion = 0.25
 
     # Refinement starts 10% away from inlet/outlet
     bbox = gmsh.model.getBoundingBox(-1, -1)

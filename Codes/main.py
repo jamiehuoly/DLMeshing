@@ -7,7 +7,7 @@ from torch_geometric.utils import is_undirected
 
 import utils
 
-GENERATE_FINE_MESH = False
+GENERATE_FINE_MESH = True
 MESH_FILE_NAME = "elbow.msh"
 VTK_FILE_PATTERN = "VTK_fine/DLMeshing_fine_*.vtk"
 GRAPH_DATA_FILE_NAME = "ground_truth_graph.pt"

@@ -1,14 +1,18 @@
+import glob
 import sys
 import gmsh
 import numpy as np
+import pyvista as pv
+import os
 import torch
 from scipy.interpolate import griddata
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, coalesce
 
-def create_tg_data(x_features, edge_index):
-    coordinate_tensor = torch.tensor(x_features, dtype=torch.float)
-    graph_data = Data(x=coordinate_tensor, edge_index=edge_index)
+def create_tg_data(x_features, edge_index, y, pos):
+    if not torch.is_tensor(x_features):
+        x_features = torch.tensor(x_features, dtype=torch.float)
+    graph_data = Data(x=x_features, edge_index=edge_index, y=y, pos=pos)
     return graph_data
 
 def add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes):
@@ -146,6 +150,93 @@ def get_tetrahedral_edges(coordinate, elems_numpy):
     edge_index = coalesce(edge_index)
 
     return edge_index
+
+def get_latest_vtk(pattern):
+    files = glob.glob(pattern)
+    if not files:
+        return None
+    files.sort(key=os.path.getmtime)
+    return files[-1]
+
+def process_vtk_to_graph(vtk_path):
+    try:
+        mesh = pv.read(vtk_path)
+    except Exception as e:
+        print(f"Failed to load vtk file: {vtk_path}; Exception is: {e}")
+        return None
+    print(f"   - 节点数量: {mesh.n_points}")
+    print(f"   - 单元数量: {mesh.n_cells}")
+
+    # Normalisation
+    raw_pos = mesh.points  # numpy array
+    centroid = np.mean(raw_pos, axis=0)
+    max_dist = np.max(np.linalg.norm(raw_pos - centroid, axis=1))
+    pos_normalized = (raw_pos - centroid) / max_dist
+    print(f"position has been normalized, scale factor is: {max_dist:.4f}")
+    x_pos = torch.tensor(pos_normalized, dtype=torch.float)
+    print(mesh.point_data)
+
+    if 'U' not in mesh.point_data or "p" not in mesh.point_data:
+        print(f"No velocity field U or pressure field p in VTK file, please check! "
+              f"Keys currently exist: {mesh.point_data.keys()}")
+        return None
+
+    # Labeling
+    # pyvista is able to compute derivatives of unstructured mesh
+    gradients = mesh.compute_derivative(scalars="U", gradient="grad_U")
+    grad_data = gradients.point_data['grad_U']  # Shape (N, 9)
+    grad_tensor = grad_data.reshape(-1, 3, 3)
+
+    # Frobenius Norm
+    # Larger means flow is more complex --> need to be refined
+    error_indicator = np.linalg.norm(grad_tensor, axis=(1, 2))
+
+    # Label Y
+    # y[:, 0] = P
+    # y[:, 1:4] = U
+    # y[:, 4] = Error Indicator
+    p_data = mesh.point_data['p']
+    u_data = mesh.point_data['U']
+    y = torch.tensor(np.column_stack((p_data, u_data, error_indicator)), dtype=torch.float)
+
+    # Normalisation
+    feat_p = torch.tensor(p_data, dtype=torch.float).view(-1, 1)
+    feat_u = torch.tensor(u_data, dtype=torch.float)
+    # Adding 1e-8 防止除0报错
+    feat_p = (feat_p - feat_p.mean()) / (feat_p.std() + 1e-8)
+    feat_u = (feat_u - feat_u.mean(dim=0)) / (feat_u.std(dim=0) + 1e-8)
+
+    # Add 10% noise to fine CFD results, pretend to be coarse CFD
+    noise_level = 0.1
+    feat_p_noisy = feat_p + torch.randn_like(feat_p) * noise_level
+    feat_u_noisy = feat_u + torch.randn_like(feat_u) * noise_level
+    x_features = torch.cat([x_pos, feat_p_noisy, feat_u_noisy], dim=1)
+
+    print(f"   - 标签构建完成. Y Shape: {y.shape}")
+    print(f"   - ⚡ 最大梯度模长 (Error Indicator): {error_indicator.max():.4f}")
+    if error_indicator.max() < 1e-3:
+        print("Warning: gradient is small, flow might be slow or outliers exist.")
+
+    # Graph Topography
+    print("   - 正在构建图连接 (这可能需要几秒钟)...")
+    edges = mesh.extract_all_edges()
+    # edges.lines 的存储格式非常奇葩，是 VTK 的标准：
+    # [2, 点A, 点B, 2, 点C, 点D, ...]
+    # 这里的 '2' 代表这条线由2个点组成。我们需要把这个 '2' 扔掉。
+    # .reshape(-1, 3): 把它变成 N行3列 -> [[2, A, B], [2, C, D], ...]
+    # [:, 1:]: 取所有行，但扔掉第0列(那个2) -> [[A, B], [C, D], ...
+    lines = edges.lines.reshape(-1, 3)[:, 1:]
+    src = lines[:, 0]
+    dst = lines[:, 1]
+
+    # 转为 PyG 需要的 (2, E) 格式，且是双向边
+    edge_index = torch.tensor(np.vstack((
+        np.concatenate([src, dst]),
+        np.concatenate([dst, src])
+    )), dtype=torch.long)
+    print(f"   - 图构建完成. 边数量: {edge_index.shape[1]}")
+    return x_features, edge_index, y, x_pos
+
 
 def enrich_features(fine_coordinates, coarse_data_path):
     """

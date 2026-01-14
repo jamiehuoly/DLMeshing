@@ -7,10 +7,10 @@ from torch_geometric.utils import is_undirected
 
 import utils
 
-GENERATE_FINE_MESH = True
+GENERATE_FINE_MESH = False
 MESH_FILE_NAME = "elbow.msh"
+VTK_FILE_PATTERN = "VTK_fine/DLMeshing_fine_*.vtk"
 GRAPH_DATA_FILE_NAME = "ground_truth_graph.pt"
-VTK_FINE_FILE_PATH = "VTK_fine/DLMeshing_fine_300.vtk"
 
 # 1. model import and initial 3D mesh generation
 gmsh.initialize()
@@ -71,25 +71,14 @@ print("Generating 3D mesh...")
 gmsh.model.mesh.generate(3)
 gmsh.write(MESH_FILE_NAME)
 
-# 2. transformed results
-### should be sure that the coordinates will be consistent to the CFD results
-coordinate, elems_numpy = utils.gmsh_tag_transform()
-# print(coordinate, elems_numpy)
-# print(coordinate.shape)
+###### ToDo: Needs to integrate the OpenFoam operations here (gmshToFoam, editing files, foamRun, foamToVTK)
 
-# 3. build torch_geometric data for NN
-edges_index = utils.get_tetrahedral_edges(coordinate, elems_numpy)
-print(is_undirected(edges_index))
+# 3. transform results from VTK files (x and y are 7-dimensional: x,y,z,p,u,v,w)
+file = utils.get_latest_vtk(VTK_FILE_PATTERN)
+x_features, edge_index, y, pos = utils.process_vtk_to_graph(file)
 
-# 4. stack u v w p into the list
-features_7d = utils.enrich_features(coordinate, "to/be/filled/path")
-
-# 5. create Data object
-graph_data = utils.create_tg_data(features_7d, edges_index)
-print(edges_index)
-print(edges_index.shape)
-print(graph_data)
-
+# 4. create Data object
+graph_data = utils.create_tg_data(x_features, edge_index, y, pos)
 torch.save(graph_data, f"{GRAPH_DATA_FILE_NAME}")
 print(f"Saved graph data to file: {GRAPH_DATA_FILE_NAME}")
 

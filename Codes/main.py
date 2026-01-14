@@ -9,6 +9,8 @@ import utils
 
 GENERATE_FINE_MESH = True
 MESH_FILE_NAME = "elbow.msh"
+GRAPH_DATA_FILE_NAME = "ground_truth_graph.pt"
+VTK_FINE_FILE_PATH = "VTK_fine/DLMeshing_fine_300.vtk"
 
 # 1. model import and initial 3D mesh generation
 gmsh.initialize()
@@ -88,8 +90,8 @@ print(edges_index)
 print(edges_index.shape)
 print(graph_data)
 
-torch.save(graph_data, "elbow_graph_input.pt")
-print("Saved graph data to elbow_graph_input.pt")
+torch.save(graph_data, f"{GRAPH_DATA_FILE_NAME}")
+print(f"Saved graph data to file: {GRAPH_DATA_FILE_NAME}")
 
 gmsh.finalize()
 

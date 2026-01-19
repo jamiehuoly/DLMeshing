@@ -164,18 +164,46 @@ def process_vtk_to_graph(vtk_path):
     except Exception as e:
         print(f"Failed to load vtk file: {vtk_path}; Exception is: {e}")
         return None
-    print(f"   - 节点数量: {mesh.n_points}")
-    print(f"   - 单元数量: {mesh.n_cells}")
+    print(f"Number of points: {mesh.n_points}")
+    print(f"Number of cells: {mesh.n_cells}")
 
-    # Normalisation
+    # Position Normalisation
     raw_pos = mesh.points  # numpy array
     centroid = np.mean(raw_pos, axis=0)
     max_dist = np.max(np.linalg.norm(raw_pos - centroid, axis=1))
     pos_normalized = (raw_pos - centroid) / max_dist
-    print(f"position has been normalized, scale factor is: {max_dist:.4f}")
     x_pos = torch.tensor(pos_normalized, dtype=torch.float)
-    print(mesh.point_data)
+    print(f"position has been normalized, scale factor is: {max_dist:.4f}")
 
+    # Labeling Characteristic Length to target Y
+    bounds = mesh.bounds
+    L_char = np.linalg.norm(np.array([
+        bounds[1] - bounds[0],
+        bounds[3] - bounds[2],
+        bounds[5] - bounds[4]
+    ]))
+    if mesh.n_cells == 0:
+        return None
+
+    sized = mesh.compute_cell_sizes()
+    mesh_point_data = sized.cell_data_to_point_data()
+    point_volumes = mesh_point_data.point_data['Volume']
+    h_abs = np.cbrt(point_volumes)
+
+    # dimensionless
+    h_ratio = h_abs / L_char
+    target_size_log = np.log10(h_ratio + 1e-12)
+
+    # Label Y [P, U, Log_Size]
+    p_data = mesh.point_data['p']
+    u_data = mesh.point_data['U']
+    y_target_col = torch.tensor(target_size_log, dtype=torch.float).view(-1, 1)
+
+    y = torch.tensor(np.column_stack((p_data, u_data)), dtype=torch.float)
+    y = torch.cat([y, y_target_col], dim=1)
+    print(f"   🎯 学习目标 (Log Size): Mean={target_size_log.mean():.2f}")
+
+    # Processing CFD results
     if 'U' not in mesh.point_data or "p" not in mesh.point_data:
         print(f"No velocity field U or pressure field p in VTK file, please check! "
               f"Keys currently exist: {mesh.point_data.keys()}")
@@ -186,20 +214,10 @@ def process_vtk_to_graph(vtk_path):
     gradients = mesh.compute_derivative(scalars="U", gradient="grad_U")
     grad_data = gradients.point_data['grad_U']  # Shape (N, 9)
     grad_tensor = grad_data.reshape(-1, 3, 3)
-
-    # Frobenius Norm
-    # Larger means flow is more complex --> need to be refined
     error_indicator = np.linalg.norm(grad_tensor, axis=(1, 2))
+    feat_grad = torch.tensor(error_indicator, dtype=torch.float).view(-1, 1)
+    feat_grad = (feat_grad - feat_grad.mean()) / (feat_grad.std() + 1e-8)
 
-    # Label Y
-    # y[:, 0] = P
-    # y[:, 1:4] = U
-    # y[:, 4] = Error Indicator
-    p_data = mesh.point_data['p']
-    u_data = mesh.point_data['U']
-    y = torch.tensor(np.column_stack((p_data, u_data, error_indicator)), dtype=torch.float)
-
-    # Normalisation
     feat_p = torch.tensor(p_data, dtype=torch.float).view(-1, 1)
     feat_u = torch.tensor(u_data, dtype=torch.float)
     # Adding 1e-8 防止除0报错
@@ -210,7 +228,8 @@ def process_vtk_to_graph(vtk_path):
     noise_level = 0.1
     feat_p_noisy = feat_p + torch.randn_like(feat_p) * noise_level
     feat_u_noisy = feat_u + torch.randn_like(feat_u) * noise_level
-    x_features = torch.cat([x_pos, feat_p_noisy, feat_u_noisy], dim=1)
+    feat_grad_noisy = feat_grad + torch.randn_like(feat_grad) * noise_level
+    x_features = torch.cat([x_pos, feat_p_noisy, feat_u_noisy, feat_grad_noisy], dim=1)
 
     print(f"   - 标签构建完成. Y Shape: {y.shape}")
     print(f"   - ⚡ 最大梯度模长 (Error Indicator): {error_indicator.max():.4f}")
@@ -235,7 +254,7 @@ def process_vtk_to_graph(vtk_path):
         np.concatenate([dst, src])
     )), dtype=torch.long)
     print(f"   - 图构建完成. 边数量: {edge_index.shape[1]}")
-    return x_features, edge_index, y, x_pos
+    return x_features, edge_index, y, x_pos, L_char
 
 
 def enrich_features(fine_coordinates, coarse_data_path):

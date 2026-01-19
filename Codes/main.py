@@ -75,10 +75,11 @@ gmsh.write(MESH_FILE_NAME)
 
 # 3. transform results from VTK files (x and y are 7-dimensional: x,y,z,p,u,v,w)
 file = utils.get_latest_vtk(VTK_FILE_PATTERN)
-x_features, edge_index, y, pos = utils.process_vtk_to_graph(file)
+x_features, edge_index, y, pos, L_Char = utils.process_vtk_to_graph(file)
 
 # 4. create Data object
 graph_data = utils.create_tg_data(x_features, edge_index, y, pos)
+graph_data.L_Char = torch.tensor(L_Char, dtype=torch.float)
 torch.save(graph_data, f"{GRAPH_DATA_FILE_NAME}")
 print(f"Saved graph data to file: {GRAPH_DATA_FILE_NAME}")
 

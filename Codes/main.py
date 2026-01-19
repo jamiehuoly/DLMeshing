@@ -71,7 +71,7 @@ print("Generating 3D mesh...")
 gmsh.model.mesh.generate(3)
 gmsh.write(MESH_FILE_NAME)
 
-###### ToDo: Needs to integrate the OpenFoam operations here (gmshToFoam, editing files, foamRun, foamToVTK)
+# ToDo: Needs to integrate the OpenFoam operations here (gmshToFoam, editing files, foamRun, foamToVTK)
 
 # 3. transform results from VTK files (x and y are 7-dimensional: x,y,z,p,u,v,w)
 file = utils.get_latest_vtk(VTK_FILE_PATTERN)
@@ -84,5 +84,8 @@ print(f"Saved graph data to file: {GRAPH_DATA_FILE_NAME}")
 
 gmsh.finalize()
 
-# To do: loss function define & model initialising & training
-# To do: Hardware detect algorithm (GPU/CPU)
+# ToDo: loss function define & model initialising & training
+# ToDo: Hardware detect algorithm (GPU/CPU)
+
+
+

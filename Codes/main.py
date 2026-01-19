@@ -58,12 +58,12 @@ if GENERATE_FINE_MESH:
     # use gmsh setSize to set the characteristic length of nodes in refinement section
     if points_to_refine:
         gmsh.model.mesh.setSize(points_to_refine, LC_FINE)
-        print(f"已强制设置 {len(points_to_refine)} 个底部顶点的尺寸为 {LC_FINE}")
+        print(f"Sizes of {len(points_to_refine)} nodes has been set to {LC_FINE}")
 
     # use gmsh setSize to set the characteristic length of nodes in coarse section
     if points_to_coarsen:
         gmsh.model.mesh.setSize(points_to_coarsen, LC_COARSE)
-        print(f"已强制设置 {len(points_to_coarsen)} 个顶部顶点的尺寸为 {LC_COARSE}")
+        print(f"Sizes of {len(points_to_coarsen)} nodes has been set to {LC_COARSE}")
 
     MESH_FILE_NAME = "fine_elbow.msh"
 

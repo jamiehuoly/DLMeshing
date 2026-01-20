@@ -124,6 +124,7 @@ if TRAINING_MODE:
         loss = criterion(output[train_idx], target[train_idx])
         loss.backward()
         optimizer.step()
+        # Carry out test loss every 100 epoch
         if (epoch + 1) % 100 == 0:
             model.eval()
             with torch.no_grad():

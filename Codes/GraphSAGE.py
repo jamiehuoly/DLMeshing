@@ -6,17 +6,13 @@ from torch_geometric.loader import DataLoader
 import os
 import numpy as np
 
-# --- 配置参数 ---
 DATA_FILE = "ground_truth_graph.pt"
 MODEL_SAVE_PATH = "gnn_model_elbow.pth"
-LEARNING_RATE = 0.001
-EPOCHS = 2000
 HIDDEN_CHANNELS = 128
 
 
-# ==========================================
-# 1. 定义 GNN 模型 (GraphSAGE)
-# ==========================================
+# GraphSAGE Model
+# Input is 8 dimensions: [x, y, z, p, u, v, w, gradU]
 class MeshRefinementGNN(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -25,7 +21,7 @@ class MeshRefinementGNN(torch.nn.Module):
         # Convolution 2: 128 hidden dimensions -> 128 hidden dimensions
         self.conv2 = SAGEConv(HIDDEN_CHANNELS, HIDDEN_CHANNELS)
         # Convolution 3: 128 hidden dimensions -> 128 hidden dimensions
-        self.conv3 = SAGEConv(HIDDEN_CHANNELS, out_channels)
+        self.conv3 = SAGEConv(HIDDEN_CHANNELS, HIDDEN_CHANNELS)
         # Layer 4: Output -> 1 (Log Size)
         self.conv4 = SAGEConv(HIDDEN_CHANNELS, out_channels)
 

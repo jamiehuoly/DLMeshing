@@ -1,6 +1,4 @@
 import torch
-import torch.nn.functional as F
-from torch_geometric.nn import SAGEConv
 import pyvista as pv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,10 +51,9 @@ def verify_results():
     plt.show()
 
     print("\nTruth vs Pred vs Error...")
-    # 计算绝对误差
+
     error = np.abs(true_np - pred_np)
 
-    # 准备 PyVista 网格
     cloud = pv.PolyData(data.pos.cpu().numpy())
     cloud.point_data["Ground_Truth"] = true_np
     cloud.point_data["Prediction"] = pred_np
@@ -64,24 +61,16 @@ def verify_results():
     cloud_middle = cloud.copy()
     cloud_right = cloud.copy()
 
-    # 创建 1行3列 的对比窗口
     plotter = pv.Plotter(shape=(1, 3), window_size=[1800, 600])
-
-    # [左图] 真实值 (老师的答案)
     plotter.subplot(0, 0)
     plotter.add_text("1. Ground Truth (Target)\nBlue=Dense, Red=Coarse", font_size=10)
     plotter.add_mesh(cloud, scalars="Ground_Truth", cmap="jet", point_size=5)
-
-    # [中图] 预测值 (学生的答案)
     plotter.subplot(0, 1)
     plotter.add_text("2. Model Prediction", font_size=10)
     plotter.add_mesh(cloud_middle, scalars="Prediction", cmap="jet", point_size=5)
-
-    # [右图] 误差图 (哪里学得不好)
     plotter.subplot(0, 2)
     plotter.add_text("3. Absolute Error (Diff)", font_size=10)
     plotter.add_mesh(cloud_right, scalars="Abs_Error", cmap="coolwarm", point_size=5, clim=[0, 0.5])
-    # clim 设置为 0 到 0.5，让误差明显的地方变红
 
     plotter.link_views()
     plotter.show()

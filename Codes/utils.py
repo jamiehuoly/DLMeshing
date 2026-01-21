@@ -33,8 +33,8 @@ def add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes):
 
 def gmsh_option_setting():
     gmsh.option.setNumber("Mesh.ElementOrder", 1)
-    gmsh.option.setNumber("Mesh.Optimize", 1)
-    gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
+    # gmsh.option.setNumber("Mesh.Optimize", 1)
+    # gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
     gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
     gmsh.option.setNumber("Mesh.Binary", 0)  # 0 表示 ASCII
 
@@ -158,7 +158,7 @@ def get_latest_vtk(pattern):
     files.sort(key=os.path.getmtime)
     return files[-1]
 
-def process_vtk_to_graph(vtk_path):
+def process_vtk_to_graph(vtk_path, mode):
     try:
         mesh = pv.read(vtk_path)
     except Exception as e:
@@ -224,8 +224,10 @@ def process_vtk_to_graph(vtk_path):
     feat_p = (feat_p - feat_p.mean()) / (feat_p.std() + 1e-8)
     feat_u = (feat_u - feat_u.mean(dim=0)) / (feat_u.std(dim=0) + 1e-8)
 
-    # Add 10% noise to fine CFD results, pretend to be coarse CFD
-    noise_level = 0.1
+    # Add 10% noise to fine CFD results when training, pretend to be coarse CFD
+    noise_level = 0
+    if mode.lower() == "train":
+        noise_level = 0.1
     feat_p_noisy = feat_p + torch.randn_like(feat_p) * noise_level
     feat_u_noisy = feat_u + torch.randn_like(feat_u) * noise_level
     feat_grad_noisy = feat_grad + torch.randn_like(feat_grad) * noise_level
@@ -254,7 +256,7 @@ def process_vtk_to_graph(vtk_path):
         np.concatenate([dst, src])
     )), dtype=torch.long)
     print(f"   - 图构建完成. 边数量: {edge_index.shape[1]}")
-    return x_features, edge_index, y, x_pos, L_char
+    return x_features, edge_index, y, x_pos, L_char, raw_pos
 
 
 def enrich_features(fine_coordinates, coarse_data_path):

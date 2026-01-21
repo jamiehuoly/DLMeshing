@@ -9,7 +9,7 @@ from GraphSAGE import MeshRefinementGNN
 
 import utils
 
-TRAINING_MODE = True
+MODE = "Train"
 GENERATE_FINE_MESH = True
 MESH_FILE_NAME = "elbow.msh"
 VTK_FILE_PATTERN = "VTK_fine/DLMeshing_fine_*.vtk"
@@ -83,7 +83,7 @@ gmsh.finalize()
 
 # 3. transform results from VTK files (x and y are 8-dimensional: x,y,z,p,u,v,w,gradU)
 file = utils.get_latest_vtk(VTK_FILE_PATTERN)
-x_features, edge_index, y, pos, L_Char = utils.process_vtk_to_graph(file)
+x_features, edge_index, y, pos, L_Char, raw_pos = utils.process_vtk_to_graph(file, MODE)
 
 # 4. create Data object and save .pt file
 graph_data = utils.create_tg_data(x_features, edge_index, y, pos)
@@ -92,7 +92,7 @@ torch.save(graph_data, f"{GRAPH_DATA_FILE_NAME}")
 print(f"Saved graph data to file: {GRAPH_DATA_FILE_NAME}")
 
 # 5. Model Training
-if TRAINING_MODE:
+if MODE.lower() == "train":
     data = torch.load(GRAPH_DATA_FILE_NAME, weights_only=False)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = data.to(device)

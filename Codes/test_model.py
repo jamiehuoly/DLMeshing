@@ -35,7 +35,7 @@ def verify_results():
     pred_np = pred_log.cpu().numpy().flatten()
     true_np = true_log.cpu().numpy().flatten()
 
-
+    print("Plotting Graphs....")
     plt.figure(figsize=(6, 6))
     plt.scatter(true_np, pred_np, alpha=0.3, s=2, c='blue')
 
@@ -49,8 +49,6 @@ def verify_results():
     plt.grid(True)
     plt.legend()
     plt.show()
-
-    print("\nTruth vs Pred vs Error...")
 
     error = np.abs(true_np - pred_np)
 

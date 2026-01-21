@@ -9,6 +9,9 @@ from GraphSAGE import MeshRefinementGNN
 
 import utils
 
+# ToDo: These procedures in main.py should be refracted to individual files
+# ToDo: Constant variables should all be defined in a config file rather than .py
+
 MODE = "Train"
 GENERATE_FINE_MESH = True
 MESH_FILE_NAME = "elbow.msh"

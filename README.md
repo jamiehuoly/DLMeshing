@@ -11,3 +11,6 @@ Manually Refined Mesh by Gmsh
 
 Simulation Results of Manually Refined Case (Velocity U)
 ![Simulation Results of Manually Refined Case.png](Simulation%20Results%20of%20Manually%20Refined%20Case.png)
+
+GNN Optimized Mesh
+![GNN Optimized Mesh.png](GNN%20Optimized%20Mesh.png)

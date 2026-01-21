@@ -7,12 +7,13 @@ GEOMETRY_FILE = "elbow.step"
 POS_FILE = "target_size_field.pos"
 OUTPUT_MESH_FILE = "GNN_optimized_mesh.msh"
 
+# Physical groups are excluded
 def generate_mesh_from_pos():
     if not os.path.exists(GEOMETRY_FILE):
-        print(f"❌ 错误: 找不到几何文件 {GEOMETRY_FILE}")
+        print(f"Error! Cannot find geometry file {GEOMETRY_FILE}")
         return
     if not os.path.exists(POS_FILE):
-        print(f"❌ 错误: 找不到尺寸场文件 {POS_FILE}")
+        print(f"Error! Cannot find .pos file {POS_FILE}")
         return
 
     gmsh.initialize()

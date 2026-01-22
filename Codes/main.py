@@ -37,6 +37,7 @@ inlet_tags, outlet_tags, wall_tags = utils.define_mesh_boundaries(surfaces)
 
 # Define Physical Groups
 ## Inlet, Outlet, wall, flow field
+## ToDo: BIG PROBLEM: It is impossible for customers to provide CFD information of geometry
 res = utils.add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes)
 if not res:
     print("error when adding physical group, system exit!")

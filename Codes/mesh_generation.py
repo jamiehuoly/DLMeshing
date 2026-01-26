@@ -22,7 +22,7 @@ def generate_mesh_from_geometry(config_file=None, geometry_file=None):
     utils.gmsh_option_setting()
 
     # First branch: Mesh information provided by customers
-    if config.get("mode") == "manual" and "boundaries" in config:
+    if config.get("mode").lower() == "manual" and "boundaries" in config:
         print("Mode is manual! Processing mesh config file....")
         bounds = config["boundaries"]
 

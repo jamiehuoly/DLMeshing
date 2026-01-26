@@ -188,10 +188,13 @@ def process_vtk_to_graph(vtk_path, mode):
     sized = mesh.compute_cell_sizes()
     mesh_point_data = sized.cell_data_to_point_data()
     point_volumes = mesh_point_data.point_data['Volume']
+    # Do cube root is a simple way to obtain length but will lead to smaller result -> will lead to finer mesh generated
+    # Normally in CFD finer mesh is acceptable. Can be dived in to see how to make it fitter in the future
     h_abs = np.cbrt(point_volumes)
 
     # dimensionless
     h_ratio = h_abs / L_char
+    # log10 avoid gradient problem
     target_size_log = np.log10(h_ratio + 1e-12)
 
     # Label Y [P, U, Log_Size]
@@ -201,7 +204,6 @@ def process_vtk_to_graph(vtk_path, mode):
 
     y = torch.tensor(np.column_stack((p_data, u_data)), dtype=torch.float)
     y = torch.cat([y, y_target_col], dim=1)
-    print(f"   🎯 学习目标 (Log Size): Mean={target_size_log.mean():.2f}")
 
     # Processing CFD results
     if 'U' not in mesh.point_data or "p" not in mesh.point_data:
@@ -233,13 +235,12 @@ def process_vtk_to_graph(vtk_path, mode):
     feat_grad_noisy = feat_grad + torch.randn_like(feat_grad) * noise_level
     x_features = torch.cat([x_pos, feat_p_noisy, feat_u_noisy, feat_grad_noisy], dim=1)
 
-    print(f"   - 标签构建完成. Y Shape: {y.shape}")
-    print(f"   - ⚡ 最大梯度模长 (Error Indicator): {error_indicator.max():.4f}")
+    print(f"Maximum error indicator: {error_indicator.max():.4f}")
     if error_indicator.max() < 1e-3:
         print("Warning: gradient is small, flow might be slow or outliers exist.")
 
     # Graph Topography
-    print("   - 正在构建图连接 (这可能需要几秒钟)...")
+    print("Building graph connections...")
     edges = mesh.extract_all_edges()
     # edges.lines 的存储格式非常奇葩，是 VTK 的标准：
     # [2, 点A, 点B, 2, 点C, 点D, ...]
@@ -255,7 +256,7 @@ def process_vtk_to_graph(vtk_path, mode):
         np.concatenate([src, dst]),
         np.concatenate([dst, src])
     )), dtype=torch.long)
-    print(f"   - 图构建完成. 边数量: {edge_index.shape[1]}")
+    print(f"Finished graph building, number of edges: {edge_index.shape[1]}")
     return x_features, edge_index, y, x_pos, L_char, raw_pos
 
 

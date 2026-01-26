@@ -4,7 +4,6 @@ import utils
 
 def generate_mesh_from_geometry(config_file=None, geometry_file=None):
     inlet_tags = outlet_tags = wall_tags = []
-    # 1. 加载配置
     config = utils.read_geo_config(config_file, geometry_file)
     step_file = config.get("geometry_file", geometry_file)
     output_coarse_mesh_file = config.get("output_coarse_mesh_file", "default_coarse_mesh.msh")

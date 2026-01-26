@@ -55,29 +55,33 @@ def define_mesh_boundaries(surfaces):
     curved_tags = []
     inlet_id = []
     outlet_ids = []
-    # 1. 几何分类
     for dim, tag in surfaces:
         stype = gmsh.model.getType(dim, tag)
         if stype == "Plane":
-            planar_tags.append(tag)
+            area = gmsh.model.occ.getMass(2, tag)
+            planar_tags.append({'tag': tag, 'area': area})
         else:
             curved_tags.append(tag)
 
-    # 2. 血管逻辑：平面通常是开口，曲面是血管壁
+    # 血管逻辑：平面通常是开口，曲面是血管壁
     if len(planar_tags) >= 2:
         # 策略：面积最大的平面可能是 Inlet (主动脉)，其余平面是 Outlets (分叉)
+        planar_tags.sort(key=lambda x: x['area'], reverse=True)
+        inlet_info = planar_tags[0]
         # 或者简单点：第一个是 Inlet，剩下全是 Outlets
-        inlet_id = [planar_tags[0]]
-        outlet_ids = planar_tags[1:]
+        inlet_id = [inlet_info["tag"]]
+        outlet_infos = planar_tags[1:]
+        outlet_ids = [item['tag'] for item in outlet_infos]
 
-        print(f"   - Auto Inlet (ID=1): Surface {inlet_id}")
-        print(f"   - Auto Outlets (ID=2): Surface {outlet_ids}")
+        print(f"   - Auto Inlet (Max Area={inlet_info['area']:.2f}): ID {inlet_id}")
+        print(f"   - Auto Outlets (Rest Areas): IDs {outlet_ids}")
     else:
-        print("Error! Number of planar detected is less than 2. This may not vascular cases, unable to generate flow field under this settings.")
-        safe_exit()
+        print("Warning! Number of planar detected is less than 2. This may not vascular case."
+              "Every surface is set to Wall! (No inlet or outlet)")
+        curved_tags.extend([p['tag'] for p in planar_tags])
 
     if curved_tags:
-        print(f"   - Auto Wall (ID=3): Surface {curved_tags}")
+        print(f"   - Auto Wall: Surface {curved_tags}")
     return inlet_id, outlet_ids, curved_tags
 
 # from gmsh-stype to numpy-style

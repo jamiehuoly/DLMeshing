@@ -41,7 +41,7 @@ inlet_tags, outlet_tags, wall_tags = utils.define_mesh_boundaries(surfaces)
 res = utils.add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes)
 if not res:
     print("error when adding physical group, system exit!")
-    sys.exit(0)
+    utils.safe_exit()
 
 # Gmsh universal settings
 utils.gmsh_option_setting()

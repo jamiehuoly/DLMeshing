@@ -9,6 +9,11 @@ from scipy.interpolate import griddata
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, coalesce
 
+def safe_exit():
+    print("System Exiting....")
+    gmsh.finalize()
+    sys.exit(0)
+
 def create_tg_data(x_features, edge_index, y, pos):
     if not torch.is_tensor(x_features):
         x_features = torch.tensor(x_features, dtype=torch.float)
@@ -43,30 +48,37 @@ def gmsh_open(filename):
         gmsh.open(filename)
     except:
         print(f"Cannot find file: {filename}")
-        gmsh.finalize()
-        sys.exit()
+        safe_exit()
 
 def define_mesh_boundaries(surfaces):
-    inlet_tmp = []
-    outlet_tmp = []
-    wall_tmp = []
-    TOL = 1e-4
-    for s in surfaces:
-        tag = s[1]
-        geometry_type = gmsh.model.getType(2, tag)
-        centroid = gmsh.model.occ.getCenterOfMass(2, tag)
-        # Here we are assuming all cases are vascular cases, there should only be 2 planes
-        if geometry_type == "Plane":
-            x, y, z = centroid[0], centroid[1], centroid[2]
-            if abs(x) < TOL or abs(y) < TOL or abs(z) < TOL:
-                print(f"-> 发现 Inlet (ID {tag}): 位于 {centroid} (坐标轴面上)")
-                inlet_tmp.append(tag)
-            else:
-                print(f"-> 发现 Outlet (ID {tag}): 位于 {centroid}")
-                outlet_tmp.append(tag)
+    planar_tags = []
+    curved_tags = []
+    inlet_id = []
+    outlet_ids = []
+    # 1. 几何分类
+    for dim, tag in surfaces:
+        stype = gmsh.model.getType(dim, tag)
+        if stype == "Plane":
+            planar_tags.append(tag)
         else:
-            wall_tmp.append(tag)
-    return inlet_tmp, outlet_tmp, wall_tmp
+            curved_tags.append(tag)
+
+    # 2. 血管逻辑：平面通常是开口，曲面是血管壁
+    if len(planar_tags) >= 2:
+        # 策略：面积最大的平面可能是 Inlet (主动脉)，其余平面是 Outlets (分叉)
+        # 或者简单点：第一个是 Inlet，剩下全是 Outlets
+        inlet_id = [planar_tags[0]]
+        outlet_ids = planar_tags[1:]
+
+        print(f"   - Auto Inlet (ID=1): Surface {inlet_id}")
+        print(f"   - Auto Outlets (ID=2): Surface {outlet_ids}")
+    else:
+        print("Error! Number of planar detected is less than 2. This may not vascular cases, unable to generate flow field under this settings.")
+        safe_exit()
+
+    if curved_tags:
+        print(f"   - Auto Wall (ID=3): Surface {curved_tags}")
+    return inlet_id, outlet_ids, curved_tags
 
 # from gmsh-stype to numpy-style
 def gmsh_tag_transform():

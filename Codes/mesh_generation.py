@@ -53,7 +53,4 @@ def generate_mesh_from_geometry(config_file=None, geometry_file=None):
 
 
 if __name__ == "__main__":
-    if os.path.exists("case_config.json"):
-        generate_mesh_from_geometry("case_config.json")
-    else:
-        generate_mesh_from_geometry(geometry_file="elbow.step")
+    generate_mesh_from_geometry("case_config.json")

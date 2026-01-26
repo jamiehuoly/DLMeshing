@@ -1,10 +1,12 @@
 import glob
 import sys
 import gmsh
+import json
 import numpy as np
 import pyvista as pv
 import os
 import torch
+from typing import Any
 from scipy.interpolate import griddata
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, coalesce
@@ -13,6 +15,17 @@ def safe_exit():
     print("System Exiting....")
     gmsh.finalize()
     sys.exit(0)
+
+def read_geo_config(config_file, geometry_file) -> Any:
+    config = {}
+    if config_file and os.path.exists(config_file):
+        with open(config_file, 'r') as f:
+            config = json.load(f)
+        print(f"Loaded config file provided: {config_file}")
+    else:
+        print("Config file not found, switched to default mode!")
+        config = {"mode": "auto", "geometry_file": geometry_file}
+    return config
 
 def create_tg_data(x_features, edge_index, y, pos):
     if not torch.is_tensor(x_features):
@@ -30,7 +43,6 @@ def add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes):
 
     if not volumes:
         print("No volumes found in model, please check!")
-        gmsh.finalize()
         return False
     volume_tags = [v[1] for v in volumes]
     gmsh.model.addPhysicalGroup(3, volume_tags, tag=100, name="fluid")

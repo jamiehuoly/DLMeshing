@@ -34,7 +34,7 @@ def generate_mesh_from_geometry(config_file=None, geometry_file=None):
         if "wall" in bounds and bounds["wall"]["surface_ids"]:
             wall_tags = bounds["wall"]["surface_ids"]
 
-    # Auto Detect
+    # Second branch: Auto Detect
     else:
         print("Carrying out auto detection mode...")
         surfaces = gmsh.model.getEntities(2)

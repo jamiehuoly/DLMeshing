@@ -38,7 +38,7 @@ def visualise_surfaces(geometry_file):
     gmsh.option.setNumber("General.Verbosity", 0)
 
     print("\n" + "Window opening to show the geometry... Feel free to rotate the model.")
-    print("Clicking 'Tools' -> 'Visibility' to view more detailed surface ids.")
+    print("Clicking 'Tools' -> 'Visibility' to view more surface ids in detail.")
     gmsh.fltk.run()
     gmsh.finalize()
 

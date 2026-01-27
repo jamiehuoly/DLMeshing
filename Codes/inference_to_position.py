@@ -26,10 +26,10 @@ def generate_size_field():
 
     print("Inferencing...")
     with torch.no_grad():
-        # 输出是 Log10(Size Ratio)
+        # output format: Log10(Size Ratio)
         pred_log_ratio = model(x, edge_index)
 
-    # 还原为真实物理尺寸: h = 10^(pred) * L_char
+    # back to real value: h = 10^(pred) * L_char
     pred_ratio = 10 ** pred_log_ratio.cpu().numpy().flatten()
     target_sizes = pred_ratio * L_char
 
@@ -43,7 +43,7 @@ def generate_size_field():
         for i in range(len(raw_pos)):
             px, py, pz = raw_pos[i] * UNIT_SCALE_FACTOR
             val = target_sizes[i] * UNIT_SCALE_FACTOR
-            # Gmsh 格式: SP(x,y,z){value};
+            # Gmsh style: SP(x,y,z){value};
             f.write(f"SP({px:.6f},{py:.6f},{pz:.6f}){{{val:.6f}}};\n")
         f.write('};\n')
 

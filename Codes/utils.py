@@ -203,36 +203,6 @@ def process_vtk_to_graph(vtk_path, mode):
     x_pos = torch.tensor(pos_normalized, dtype=torch.float)
     print(f"position has been normalized, scale factor is: {max_dist:.4f}")
 
-    # Labeling Characteristic Length to target Y
-    bounds = mesh.bounds
-    L_char = np.linalg.norm(np.array([
-        bounds[1] - bounds[0],
-        bounds[3] - bounds[2],
-        bounds[5] - bounds[4]
-    ]))
-    if mesh.n_cells == 0:
-        return None
-
-    sized = mesh.compute_cell_sizes()
-    mesh_point_data = sized.cell_data_to_point_data()
-    point_volumes = mesh_point_data.point_data['Volume']
-    # Do cube root is a simple way to obtain length but will lead to smaller result -> will lead to finer mesh generated
-    # Normally in CFD finer mesh is acceptable. Can be dived in to see how to make it fitter in the future
-    h_abs = np.cbrt(point_volumes)
-
-    # dimensionless
-    h_ratio = h_abs / L_char
-    # log10 avoid gradient problem
-    target_size_log = np.log10(h_ratio + 1e-12)
-
-    # Label Y [P, U, Log_Size]
-    p_data = mesh.point_data['p']
-    u_data = mesh.point_data['U']
-    y_target_col = torch.tensor(target_size_log, dtype=torch.float).view(-1, 1)
-
-    y = torch.tensor(np.column_stack((p_data, u_data)), dtype=torch.float)
-    y = torch.cat([y, y_target_col], dim=1)
-
     # Processing CFD results
     if 'U' not in mesh.point_data or "p" not in mesh.point_data:
         print(f"No velocity field U or pressure field p in VTK file, please check! "
@@ -241,6 +211,8 @@ def process_vtk_to_graph(vtk_path, mode):
 
     # Labeling
     # pyvista is able to compute derivatives of unstructured mesh
+    p_data = mesh.point_data['p']
+    u_data = mesh.point_data['U']
     gradients = mesh.compute_derivative(scalars="U", gradient="grad_U")
     grad_data = gradients.point_data['grad_U']  # Shape (N, 9)
     grad_tensor = grad_data.reshape(-1, 3, 3)
@@ -266,6 +238,33 @@ def process_vtk_to_graph(vtk_path, mode):
     print(f"Maximum error indicator: {error_indicator.max():.4f}")
     if error_indicator.max() < 1e-3:
         print("Warning: gradient is small, flow might be slow or outliers exist.")
+
+    # Labeling Characteristic Length to target Y
+    bounds = mesh.bounds
+    L_char = np.linalg.norm(np.array([
+        bounds[1] - bounds[0],
+        bounds[3] - bounds[2],
+        bounds[5] - bounds[4]
+    ]))
+    if mesh.n_cells == 0:
+        return None
+
+    sized = mesh.compute_cell_sizes()
+    mesh_point_data = sized.cell_data_to_point_data()
+    point_volumes = mesh_point_data.point_data['Volume']
+    # Do cube root is a simple way to obtain length but will lead to smaller result -> will lead to finer mesh generated
+    # Normally in CFD finer mesh is acceptable. Can be dived in to see how to make it fitter in the future
+    h_abs = np.cbrt(point_volumes)
+
+    # dimensionless
+    h_ratio = h_abs / L_char
+    # log10 avoid gradient problem
+    target_size_log = np.log10(h_ratio + 1e-12)
+
+    # Label Y [P, U, Log_Size]
+    y_target_col = torch.tensor(target_size_log, dtype=torch.float).view(-1, 1)
+    y = torch.tensor(np.column_stack((p_data, u_data)), dtype=torch.float)
+    y = torch.cat([y, y_target_col], dim=1)
 
     # Graph Topography
     print("Building graph connections...")

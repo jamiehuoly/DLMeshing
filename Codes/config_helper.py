@@ -1,6 +1,5 @@
 import os
 import sys
-
 import gmsh
 
 # This detection is for vascular problems. It divides plane elements and curved elements.

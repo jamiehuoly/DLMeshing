@@ -115,7 +115,7 @@ if MODE.lower() == "train":
 
     model = MeshRefinementGNN(in_channels=data.x.shape[1], out_channels=1).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    criterion = torch.nn.SmoothL1Loss(beta=1.0)
+    criterion = torch.nn.SmoothL1Loss(beta=1.0) # Huber loss (分段函数), combines L1 loss (MSE) & L2 loss (MAE)
     loss_history = []
 
     print(f"Start training {EPOCHS} Epochs...")
@@ -144,9 +144,6 @@ if MODE.lower() == "train":
     torch.save(model.state_dict(), full_save_path)
     print(f"\nModel saved to: ./{full_save_path}")
 
-    model.eval()
-    with torch.no_grad():
-        pred = model(data.x, data.edge_index)
 
 
 

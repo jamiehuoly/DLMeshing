@@ -3,7 +3,7 @@ import sys
 
 import gmsh
 
-
+# This detection is for vascular problems. It divides plane elements and curved elements.
 def visualise_surfaces(geometry_file):
     if not os.path.exists(geometry_file):
         print(f"Error! Could not find geometry file: {geometry_file}")

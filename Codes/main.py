@@ -104,6 +104,7 @@ if MODE.lower() == "train":
     print(f"Dimensions of features: {data.x.shape[1]} (Expected 8)")
     print(f"Number of sample points: {data.x.shape[0]}")
 
+    # 主要训练 LC
     target = data.y[:, 4].view(-1, 1)
 
     # 切分训练/测试集

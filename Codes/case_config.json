@@ -3,6 +3,7 @@
     "geometry_file": "elbow.step",
     "output_coarse_mesh_file": "default_coarse_mesh.msh",
     "output_fine_mesh_file": "default_fine_mesh.msh",
+    "output_optimized_mesh_file": "default_optimized_mesh.msh",
     "physics": {
         "initial_velocity": [0.5, 0, 0],
         "kinematic_viscosity": 3.5e-6,

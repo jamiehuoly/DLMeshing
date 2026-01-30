@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p
+    {
+        solver          PBiCGStab;
+	preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    "(U|k|epsilon|omega|R|nuTilda).*"
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        tolerance       1e-05;
+        relTol          0;
+    }
+}
+
+relaxationFactors
+{
+    fields
+    {
+        p               0.3; // 压力的变化只取 30%
+    }
+    equations
+    {
+        U               0.7; // 速度的变化取 70%
+        // 如果你有 k, epsilon 等，也设为 0.7
+    }
+}
+
+SIMPLE
+{
+    nCorrectors     2;
+    nNonOrthogonalCorrectors 1;
+    pRefCell        0;
+    pRefValue       0;
+    {
+	p    1e-4;
+	U    1e-4;
+}
+
+
+// ************************************************************************* //

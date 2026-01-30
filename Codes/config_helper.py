@@ -1,6 +1,9 @@
+import json
 import os
 import sys
 import gmsh
+
+CONFIG_FILE = "case_config.json"
 
 # This detection is for vascular problems. It divides plane elements and curved elements.
 def visualise_surfaces(geometry_file):
@@ -43,12 +46,18 @@ def visualise_surfaces(geometry_file):
 
 if __name__ == "__main__":
     # python config_helper.py model.step
+    if CONFIG_FILE and os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            config = json.load(f)
+    geo_file = config.get("geometry_file", "")
+
     if len(sys.argv) > 1:
         input_file = sys.argv[1]
         visualise_surfaces(input_file)
+    elif geo_file:
+
+        print(f"\nDetected defined geometry file: {geo_file} in case_config.json, start reading...\n")
+        visualise_surfaces(geo_file)
     else:
         default_file = "elbow.step"
-        if os.path.exists(default_file):
-            visualise_surfaces(default_file)
-        else:
-            print("Geometry file is not provided. Please use 'python config_helper.py model.step' to run the script.")
+        visualise_surfaces(default_file)

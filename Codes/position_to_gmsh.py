@@ -3,22 +3,23 @@ import os
 import sys
 import utils
 
-GEOMETRY_FILE = "elbow.step"
-POS_FILE = "target_size_field.pos"
-OUTPUT_MESH_FILE = "GNN_optimized_mesh.msh"
+# GEOMETRY_FILE = "elbow.step"
+# POS_FILE = "target_size_field.pos"
+# OUTPUT_MESH_FILE = "GNN_optimized_mesh.msh"
 
 # Physical groups are excluded
-def generate_mesh_from_pos():
-    if not os.path.exists(GEOMETRY_FILE):
-        print(f"Error! Cannot find geometry file {GEOMETRY_FILE}")
+def generate_mesh_from_pos(config, pos_output_path):
+    geometry_file = config["geometry_file"]
+    if not os.path.exists(geometry_file):
+        print(f"Error! Cannot find geometry file {geometry_file}")
         return
-    if not os.path.exists(POS_FILE):
-        print(f"Error! Cannot find .pos file {POS_FILE}")
+    if not os.path.exists(pos_output_path):
+        print(f"Error! Cannot find .pos file {pos_output_path}")
         return
 
     gmsh.initialize()
-    gmsh.open(GEOMETRY_FILE)
-    gmsh.merge(POS_FILE)
+    gmsh.open(geometry_file)
+    gmsh.merge(pos_output_path)
     background = gmsh.model.mesh.field.add("PostView")
 
     gmsh.model.mesh.field.setNumber(background, "ViewIndex", 0)
@@ -36,22 +37,18 @@ def generate_mesh_from_pos():
         print(f"Error occurs when generating 3D mesh: {e}")
         gmsh.finalize()
         return
+    output_mesh_path = os.path.join(config["work_dir"], config["output_optimized_mesh_file"])
+    gmsh.write(output_mesh_path)
+    print(f"3D mesh is generated and saved to: {output_mesh_path}")
 
-    gmsh.write(OUTPUT_MESH_FILE)
-    print(f"3D mesh is generated and saved to {OUTPUT_MESH_FILE}")
 
-
-    element_types = gmsh.model.mesh.getElementTypes()
-    for t in element_types:
-        name = gmsh.model.mesh.getElementProperties(t)[0]
-        if "Tet" in name: # Tetrahedron
-            num = gmsh.model.mesh.getElementsByType(t)[0].size
-            print(f"Number of {name}: {num}")
+    # element_types = gmsh.model.mesh.getElementTypes()
+    # for t in element_types:
+    #     name = gmsh.model.mesh.getElementProperties(t)[0]
+    #     if "Tet" in name: # Tetrahedron
+    #         num = gmsh.model.mesh.getElementsByType(t)[0].size
+    #         print(f"Number of {name}: {num}")
 
     # pop-ups
     # gmsh.fltk.run()
     gmsh.finalize()
-
-
-if __name__ == "__main__":
-    generate_mesh_from_pos()

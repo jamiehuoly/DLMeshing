@@ -8,11 +8,10 @@ from GraphSAGE import MeshRefinementGNN
 UNIT_SCALE_FACTOR = 1000.0
 COARSE_VTK_PATH = "VTK_Coarse/DLMeshing_coarse_300.vtk"
 MODEL_PATH = "trained_models/gnn_model.pth"
-OUTPUT_POS_FILE = "target_size_field.pos"
 
-def generate_size_field():
+def generate_size_field(coarse_vtk_path, output_path, mode="inference"):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    x_features, edge_index, _, x_pos, L_char, raw_pos = utils.process_vtk_to_graph(COARSE_VTK_PATH, mode="inference")
+    x_features, edge_index, _, x_pos, L_char, raw_pos = utils.process_vtk_to_graph(coarse_vtk_path, mode=mode)
     x = x_features.to(device)
     edge_index = edge_index.to(device)
 
@@ -37,8 +36,8 @@ def generate_size_field():
     min_size_limit = L_char * 0.001
     target_sizes = np.maximum(target_sizes, min_size_limit)
 
-    print(f"Now writing .pos file: {OUTPUT_POS_FILE}")
-    with open(OUTPUT_POS_FILE, "w") as f:
+    print(f"Now writing .pos file to: {output_path}")
+    with open(output_path, "w") as f:
         f.write('View "Background Mesh" {\n')
         for i in range(len(raw_pos)):
             px, py, pz = raw_pos[i] * UNIT_SCALE_FACTOR
@@ -48,7 +47,3 @@ def generate_size_field():
         f.write('};\n')
 
     print("Finished writing .pos file!")
-
-
-if __name__ == "__main__":
-    generate_size_field()

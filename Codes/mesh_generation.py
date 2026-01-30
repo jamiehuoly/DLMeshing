@@ -2,10 +2,10 @@ import os
 import gmsh
 import utils
 
-def generate_mesh_from_geometry(config_file=None, default_geometry_file=None):
+def generate_mesh_from_geometry(config_file=None):
     inlet_tags = outlet_tags = wall_tags = []
-    config = utils.read_geo_config(config_file, default_geometry_file)
-    step_file = config.get("geometry_file", default_geometry_file)
+    config = utils.get_config_json(config_file)
+    step_file = config.get("geometry_file")
     output_coarse_mesh_file = config.get("output_coarse_mesh_file", "default_coarse_mesh.msh")
     if not step_file:
         print("Error while reading geometry file!")
@@ -50,7 +50,3 @@ def generate_mesh_from_geometry(config_file=None, default_geometry_file=None):
     gmsh.write(output_coarse_mesh_file)
     gmsh.finalize()
     return True
-
-
-if __name__ == "__main__":
-    generate_mesh_from_geometry("case_config.json")

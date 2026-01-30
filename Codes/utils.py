@@ -16,7 +16,7 @@ def safe_exit():
     gmsh.finalize()
     sys.exit(0)
 
-def read_geo_config(config_file, geometry_file) -> Any:
+def get_config_json(config_file) -> Any:
     config = {}
     if config_file and os.path.exists(config_file):
         with open(config_file, 'r') as f:
@@ -24,7 +24,7 @@ def read_geo_config(config_file, geometry_file) -> Any:
         print(f"Loaded config file provided: {config_file}")
     else:
         print("Config file not found, switched to default mode!")
-        config = {"mode": "auto", "geometry_file": geometry_file}
+        config = {"mode": "auto", "geometry_file": "elbow.step"}
     return config
 
 def create_tg_data(x_features, edge_index, y, pos):

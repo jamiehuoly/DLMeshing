@@ -55,7 +55,6 @@ if __name__ == "__main__":
         input_file = sys.argv[1]
         visualise_surfaces(input_file)
     elif geo_file:
-
         print(f"\nDetected defined geometry file: {geo_file} in case_config.json, start reading...\n")
         visualise_surfaces(geo_file)
     else:

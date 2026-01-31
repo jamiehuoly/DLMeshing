@@ -11,6 +11,21 @@ from scipy.interpolate import griddata
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, coalesce
 
+def train_data_process(graph_data_file, device):
+    data = torch.load(graph_data_file, weights_only=False)
+    data = data.to(device)
+    print(f"Device selected: {device}")
+    print(f"Dimensions of features: {data.x.shape[1]} (Expected 8)")
+    print(f"Number of sample points: {data.x.shape[0]}")
+
+    # 切分训练/测试集
+    num_nodes = data.x.shape[0]
+    indices = torch.randperm(num_nodes)
+    split = int(num_nodes * 0.8)
+    train_indices = indices[:split]
+    test_indices = indices[split:]
+    return data, train_indices, test_indices
+
 def parse_working_dir(config):
     if not config["work_dir"]:
         config["work_dir"] = "case"

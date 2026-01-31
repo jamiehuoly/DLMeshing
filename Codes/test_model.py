@@ -7,7 +7,7 @@ import os
 from GraphSAGE import MeshRefinementGNN
 
 DATA_FILE = "ground_truth_graph.pt"
-MODEL_PATH = os.path.join("trained_models", "gnn_model.pth")
+MODEL_PATH = os.path.join("models", "gnn_model.pth")
 HIDDEN_CHANNELS = 128
 
 def verify_results():

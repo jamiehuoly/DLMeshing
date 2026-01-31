@@ -3,13 +3,12 @@ import os
 import sys
 import utils
 
-# GEOMETRY_FILE = "elbow.step"
-# POS_FILE = "target_size_field.pos"
-# OUTPUT_MESH_FILE = "GNN_optimized_mesh.msh"
+POS_FILE_NAME = "target_size_field.pos"
 
 # Physical groups are excluded
-def generate_mesh_from_pos(config, pos_output_path):
+def generate_mesh_from_pos(config):
     geometry_file = config["geometry_file"]
+    pos_output_path = os.path.join(config["work_dir"], POS_FILE_NAME)
     if not os.path.exists(geometry_file):
         print(f"Error! Cannot find geometry file {geometry_file}")
         return

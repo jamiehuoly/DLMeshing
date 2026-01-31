@@ -22,7 +22,11 @@ EPOCHS = 2000
 if len(sys.argv) > 1:
     MODE = sys.argv[1]
     MODE = MODE.lower()
+    if MODE != "train" and MODE != "inference":
+        print("Invalid mode! Mode can only be 'train' or 'inference'")
+        utils.safe_exit()
 else:
+    # default setting
     MODE = "inference"
 
 config = utils.get_config_json(CONFIG_FILE)

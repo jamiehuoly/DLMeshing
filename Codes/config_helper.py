@@ -28,13 +28,13 @@ def visualise_surfaces(geometry_file):
             print(f"{tag:<12} | {stype:<10} | {role}")
             pass
 
-    gmsh.option.setNumber("Geometry.Surfaces", 1)  # 必须显示面
+    gmsh.option.setNumber("Geometry.Surfaces", 1)  # 显示面
     gmsh.option.setNumber("Geometry.SurfaceType", 2)  # 2 = Filled (实体填充)
     gmsh.option.setNumber("Geometry.Lines", 1)  # 显示边框线
     gmsh.option.setNumber("Geometry.SurfaceLabels", 1)  # 开启 ID 显示
     gmsh.option.setNumber("General.BackgroundGradient", 0)  # 关闭渐变背景
     gmsh.option.setColor("General.Background", 50, 50, 50)  # 深灰色背景
-    gmsh.option.setColor("Geometry.Color.Lines", 0, 0, 0)# 线条设为 黑色 (增加轮廓感)
+    gmsh.option.setColor("Geometry.Color.Lines", 0, 0, 0)# 线条设为黑色
 
     # 屏蔽日志
     gmsh.option.setNumber("General.Verbosity", 0)

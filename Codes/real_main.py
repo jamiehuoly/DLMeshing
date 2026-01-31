@@ -31,8 +31,8 @@ else:
 
 config = utils.get_config_json(CONFIG_FILE)
 if not config["work_dir"]:
-    print(f"work_dir is not defined! Please define in file: {CONFIG_FILE}!")
-    utils.safe_exit()
+    config["work_dir"] = "case"
+    print(f"work_dir is not defined! Using the default working directory: {config['work_dir']}!")
 else:
     if not os.path.exists(config["work_dir"]):
         os.makedirs(config["work_dir"])

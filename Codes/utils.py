@@ -11,6 +11,15 @@ from scipy.interpolate import griddata
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, coalesce
 
+def parse_working_dir(config):
+    if not config["work_dir"]:
+        config["work_dir"] = "case"
+        print(f"work_dir is not defined! Using the default working directory: {config['work_dir']}")
+
+    if not os.path.exists(config["work_dir"]):
+        os.makedirs(config["work_dir"])
+    print(f"Working directory is: {config['work_dir']}")
+
 def safe_exit():
     print("System Exiting....")
     gmsh.finalize()

@@ -2,9 +2,8 @@ import os
 import gmsh
 import utils
 
-def generate_mesh_from_geometry(config_file=None):
+def generate_mesh_from_geometry(config):
     inlet_tags = outlet_tags = wall_tags = []
-    config = utils.get_config_json(config_file)
     step_file = config.get("geometry_file")
     output_coarse_mesh_file = config.get("output_coarse_mesh_file", "default_coarse_mesh.msh")
     if not step_file:
@@ -22,7 +21,7 @@ def generate_mesh_from_geometry(config_file=None):
 
     # First branch: Mesh information provided by customers
     if config.get("mode").lower() == "manual" and "boundaries" in config:
-        print("Mode is manual! Processing mesh config file....")
+        print("Mode is 'manual'. Processing mesh config file....")
         bounds = config["boundaries"]
 
         if "inlet" in bounds and bounds["inlet"]["surface_ids"]:

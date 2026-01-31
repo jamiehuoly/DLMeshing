@@ -30,15 +30,10 @@ else:
     MODE = "inference"
 
 config = utils.get_config_json(CONFIG_FILE)
-if not config["work_dir"]:
-    config["work_dir"] = "case"
-    print(f"work_dir is not defined! Using the default working directory: {config['work_dir']}!")
-else:
-    if not os.path.exists(config["work_dir"]):
-        os.makedirs(config["work_dir"])
+utils.parse_working_dir(config)
 
 # read config file & generate coarse mesh
-generate_coarse = generate_mesh_from_geometry(CONFIG_FILE)
+generate_coarse = generate_mesh_from_geometry(config)
 if not generate_coarse:
     print(f"Failed to generate initial mesh!")
     utils.safe_exit()

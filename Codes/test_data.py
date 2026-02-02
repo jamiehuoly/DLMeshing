@@ -24,7 +24,7 @@ def check_visual_side_by_side_fixed():
     plotter.subplot(0, 0)
     plotter.add_text("Gradient Norm", font_size=10)
     plotter.add_mesh(cloud_left, scalars="Input_Gradient", cmap="jet",
-                     render_points_as_spheres=True, point_size=6)  # 这里的截断现在一定生效
+                     render_points_as_spheres=True, point_size=6)
     plotter.subplot(0, 1)
     plotter.add_text("Target Size Ratio (log10)", font_size=10)
     # 使用 cloud_right

@@ -5,7 +5,7 @@ import json
 import re
 
 # 1. 定义 Case 路径
-# 你可以修改为你实际的 foam_run 目录
+# TEST SCRIPT
 CASE_PATH = "/PhD/DLMeshing"
 # CASE_PATH = "/home/zhuo/foam_run/results"
 MSH_FILE = "final_mesh.msh"

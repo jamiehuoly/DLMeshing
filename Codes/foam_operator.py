@@ -8,6 +8,7 @@ import re
 # TEST SCRIPT
 # CASE_PATH = "/PhD/DLMeshing"
 CASE_PATH = "/home/zhuo/phd/test"
+TEMPLATE_PATH = "FoamTemplate"
 MSH_FILE = "elbow.msh"
 CONFIG_FILE = "case_config.json"
 
@@ -66,18 +67,16 @@ class OpenFoamAutomator:
 
     def prepare_zero_folder(self):
         """
-        从 0.orig 复制到 0 (重置状态)
+        Initialize 0 directory
         """
-        zero_orig = os.path.join(self.case_dir, "0.orig")
         zero = os.path.join(self.case_dir, "0")
+        zero_template = os.path.join(TEMPLATE_PATH, "0")
 
-        if os.path.exists(zero_orig):
-            if os.path.exists(zero):
-                shutil.rmtree(zero)
-            shutil.copytree(zero_orig, zero)
-            print("📦 Reset '0' directory from '0.orig'.")
+        if not os.path.exists(zero):
+            shutil.copytree(zero_template, zero)
+            print("Template directories are created.")
         else:
-            print("⚠️ Warning: '0.orig' not found, assuming '0' is ready.")
+            print("Zero folder already exists. Skipping.")
 
     def import_gmsh(self, msh_file):
         """

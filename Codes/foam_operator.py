@@ -6,9 +6,9 @@ import re
 
 # 1. 定义 Case 路径
 # TEST SCRIPT
-CASE_PATH = "/PhD/DLMeshing"
-# CASE_PATH = "/home/zhuo/foam_run/results"
-MSH_FILE = "final_mesh.msh"
+# CASE_PATH = "/PhD/DLMeshing"
+CASE_PATH = "/home/zhuo/phd/test"
+MSH_FILE = "elbow.msh"
 CONFIG_FILE = "case_config.json"
 
 

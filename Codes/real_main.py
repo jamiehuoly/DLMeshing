@@ -2,6 +2,7 @@ import os
 import sys
 import torch
 import utils
+from foam_operator import OpenFoamAutomator
 from GraphSAGE import MeshRefinementGNN
 from mesh_generation import generate_mesh_from_geometry
 from inference_to_position import generate_size_field
@@ -13,12 +14,14 @@ CONFIG_FILE = "case_config.json"
 MESH_FILE_NAME = "elbow.msh"
 INFER_VTK_FILE_PATTERN = "VTK_Coarse/DLMeshing_coarse_*.vtk"
 TRAIN_VTK_FILE_PATTERN = "VTK_fine/DLMeshing_fine_*.vtk"
+REAL_VTK_FILE_PATTERN = "VTK/*.vtk"
 GRAPH_DATA_FILE_NAME = "ground_truth_graph.pt"
 MODEL_SAVE_PATH = "models"
 MODEL_SAVE_NAME = "gnn_model.pth"
 LEARNING_RATE = 0.001
 EPOCHS = 2000
 
+# python3 real_main.py train/inference
 if len(sys.argv) > 1:
     MODE = sys.argv[1]
     MODE = MODE.lower()
@@ -39,7 +42,19 @@ if not generate_coarse:
     print(f"Failed to generate initial mesh!")
     utils.safe_exit()
 
-## ToDo: OpenFOAM
+runner = OpenFoamAutomator(config["work_dir"])
+runner.clean_logs()
+runner.prepare_compulsory_folders()
+
+runner.import_gmsh(config["output_coarse_mesh_file"])
+runner.scale_mesh(0.001)  # mm to m
+runner.check_mesh()
+
+runner.update_boundary_conditions(CONFIG_FILE)
+
+runner.run_solver("foamRun")
+
+runner.export_vtk()
 
 if MODE == "train":
     vtk_file = utils.get_latest_vtk(TRAIN_VTK_FILE_PATTERN)
@@ -93,7 +108,7 @@ if MODE == "train":
 else:
     # Inference
     # The model used for inference will be the legit one from 'models' directory
-    vtk_file = utils.get_latest_vtk(INFER_VTK_FILE_PATTERN)
+    vtk_file = utils.get_latest_vtk(REAL_VTK_FILE_PATTERN)
     generate_size_field(vtk_file, config, MODE)
     generate_mesh_from_pos(config)
     print("Finished generating optimized mesh!")

@@ -5,7 +5,8 @@ import utils
 def generate_mesh_from_geometry(config):
     inlet_tags = outlet_tags = wall_tags = []
     step_file = config.get("geometry_file")
-    output_coarse_mesh_file = config.get("output_coarse_mesh_file", "default_coarse_mesh.msh")
+    output_coarse_mesh_filename = config.get("output_coarse_mesh_file", "default_coarse_mesh.msh")
+    output_path = os.path.join(config["work_dir"], output_coarse_mesh_filename)
     if not step_file:
         print("Error while reading geometry file!")
         return False
@@ -46,6 +47,6 @@ def generate_mesh_from_geometry(config):
         return False
 
     gmsh.model.mesh.generate(3)
-    gmsh.write(output_coarse_mesh_file)
+    gmsh.write(output_path)
     gmsh.finalize()
     return True

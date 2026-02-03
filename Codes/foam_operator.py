@@ -231,29 +231,25 @@ class OpenFoamAutomator:
         self._run_cmd(f"rm -rf {log_path}/*.log")
         print("Done cleaning logs.")
 
-
-# ==========================================
-# 主执行逻辑
-# ==========================================
-if __name__ == "__main__":
-
-    runner = OpenFoamAutomator(CASE_PATH)
-
-    try:
-        runner.clean_logs()
-        runner.prepare_compulsory_folders()
-
-        runner.import_gmsh(MSH_FILE)
-        runner.scale_mesh(0.001)  # mm to m
-        runner.check_mesh()
-
-        runner.update_boundary_conditions(CONFIG_FILE)
-
-        runner.run_solver("foamRun")
-
-        runner.export_vtk()
-
-        print("\n🎉 All OpenFOAM tasks completed successfully!")
-
-    except Exception as e:
-        print(f"\n❌ Pipeline failed: {e}")
+# if __name__ == "__main__":
+#
+#     runner = OpenFoamAutomator(CASE_PATH)
+#
+#     try:
+#         runner.clean_logs()
+#         runner.prepare_compulsory_folders()
+#
+#         runner.import_gmsh(MSH_FILE)
+#         runner.scale_mesh(0.001)  # mm to m
+#         runner.check_mesh()
+#
+#         runner.update_boundary_conditions(CONFIG_FILE)
+#
+#         runner.run_solver("foamRun")
+#
+#         runner.export_vtk()
+#
+#         print("\n🎉 All OpenFOAM tasks completed successfully!")
+#
+#     except Exception as e:
+#         print(f"\n❌ Pipeline failed: {e}")

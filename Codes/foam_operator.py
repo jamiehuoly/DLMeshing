@@ -251,10 +251,10 @@ if __name__ == "__main__":
         runner.update_boundary_conditions(CONFIG_FILE)
 
         # 6. 运行仿真
-        # runner.run_solver("foamRun")
+        runner.run_solver("foamRun")
         #
         # # 7. 导出数据
-        # runner.export_vtk()
+        runner.export_vtk()
 
         print("\n🎉 All OpenFOAM tasks completed successfully!")
 

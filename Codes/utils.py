@@ -86,6 +86,30 @@ def gmsh_open(filename):
         print(f"Cannot find file: {filename}")
         safe_exit()
 
+def get_inlet_outlet_wall_tags(config):
+    inlet_tags = outlet_tags = wall_tags = []
+    # First branch: Mesh information provided by customers
+    if config.get("mode").lower() == "manual" and "boundaries" in config:
+        print("Mode is 'manual'. Processing mesh config file....")
+        bounds = config["boundaries"]
+
+        if "inlet" in bounds and bounds["inlet"]["surface_ids"]:
+            inlet_tags = bounds["inlet"]["surface_ids"]
+
+        if "outlet" in bounds and bounds["outlet"]["surface_ids"]:
+            outlet_tags = bounds["outlet"]["surface_ids"]
+
+        if "wall" in bounds and bounds["wall"]["surface_ids"]:
+            wall_tags = bounds["wall"]["surface_ids"]
+
+    # Second branch: Auto Detect
+    else:
+        print("Carrying out auto detection mode...")
+        surfaces = gmsh.model.getEntities(2)
+        inlet_tags, outlet_tags, wall_tags = define_mesh_boundaries(surfaces)
+
+    return inlet_tags, outlet_tags, wall_tags
+
 def define_mesh_boundaries(surfaces):
     planar_tags = []
     curved_tags = []

@@ -29,6 +29,13 @@ def generate_mesh_from_pos(config):
     gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
     gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0)
 
+    inlet_tags, outlet_tags, wall_tags = utils.get_inlet_outlet_wall_tags(config)
+
+    volumes = gmsh.model.getEntities(3)
+    res = utils.add_physical_group(inlet_tags, outlet_tags, wall_tags, volumes)
+    if not res:
+        print("Error occurs when adding physical group of final mesh, system exit!")
+
     print("Generating 3D mesh....")
     try:
         gmsh.model.mesh.generate(3)

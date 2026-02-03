@@ -218,6 +218,10 @@ class OpenFoamAutomator:
         else:
             print("   ⚠️ VTK directory was not created. Check logs.")
 
+    def clean_redundants(self):
+        self._run_cmd("foamListTimes -rm")
+        print("Done cleaning foam redundants.")
+
     def clean_logs(self):
         log_path = os.path.join(self.case_dir, "logs")
         self._run_cmd(f"zip -r {log_path}/log.zip {log_path}")

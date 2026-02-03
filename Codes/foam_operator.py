@@ -248,7 +248,7 @@ if __name__ == "__main__":
         runner.check_mesh()
 
         # 5. 修改边界条件
-        # runner.update_boundary_conditions(CONFIG_FILE)
+        runner.update_boundary_conditions(CONFIG_FILE)
 
         # 6. 运行仿真
         # runner.run_solver("foamRun")

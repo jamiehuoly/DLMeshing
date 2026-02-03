@@ -54,6 +54,7 @@ runner.update_boundary_conditions(CONFIG_FILE)
 
 runner.run_solver("foamRun")
 runner.export_vtk()
+runner.create_dummy_foam()
 runner.clean_redundants()
 
 if MODE == "train":

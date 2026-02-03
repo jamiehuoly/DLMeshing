@@ -39,7 +39,6 @@
     },
 
     "system": {
-
         "controlDict": {
             "application": "foamRun",
             "startFrom": "latestTime",

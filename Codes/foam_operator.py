@@ -65,18 +65,23 @@ class OpenFoamAutomator:
             print(f"   Error Details: {e.stderr}")
             raise e
 
-    def prepare_zero_folder(self):
-        """
-        Initialize 0 directory
-        """
-        zero = os.path.join(self.case_dir, "0")
-        zero_template = os.path.join(TEMPLATE_PATH, "0")
+    def prepare_compulsory_folders(self):
+        self.prepare_target_folder("0")
+        self.prepare_target_folder("constant")
+        self.prepare_target_folder("system")
+        print("Finished preparing compulsory folders.")
 
-        if not os.path.exists(zero):
-            shutil.copytree(zero_template, zero)
-            print("Template directories are created.")
+    def prepare_target_folder(self, folder_name: str):
+        """
+        Initialize directories
+        """
+        folder_path = os.path.join(self.case_dir, folder_name)
+        folder_template = os.path.join(TEMPLATE_PATH, folder_name)
+
+        if not os.path.exists(folder_path):
+            shutil.copytree(folder_template, folder_path)
         else:
-            print("Zero folder already exists. Skipping.")
+            print(f"Target folder: {folder_name} already exists. Skipping.")
 
     def import_gmsh(self, msh_file):
         """
@@ -229,7 +234,7 @@ if __name__ == "__main__":
 
     try:
         # 3. 准备 0 文件夹 (如果是新的仿真)
-        runner.prepare_zero_folder()
+        runner.prepare_compulsory_folders()
 
         # 4. 网格导入与处理
         runner.import_gmsh(MSH_FILE)

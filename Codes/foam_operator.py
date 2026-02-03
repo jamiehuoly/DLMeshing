@@ -219,7 +219,7 @@ class OpenFoamAutomator:
             print("   ⚠️ VTK directory was not created. Check logs.")
 
     def create_dummy_foam(self):
-        self._run_cmd(f"touch {self.case_dir}/{self.case_dir}.foam")
+        self._run_cmd(f"touch {self.case_dir}/case.foam")
 
     def clean_redundants(self):
         self._run_cmd("foamListTimes -rm")

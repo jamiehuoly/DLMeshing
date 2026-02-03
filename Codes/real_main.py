@@ -108,7 +108,8 @@ if MODE == "train":
 else:
     # Inference
     # The model used for inference will be the legit one from 'models' directory
-    vtk_file = utils.get_latest_vtk(REAL_VTK_FILE_PATTERN)
+    vtk_path_pattern = os.path.join(config["work_dir"], REAL_VTK_FILE_PATTERN)
+    vtk_file = utils.get_latest_vtk(vtk_path_pattern)
     generate_size_field(vtk_file, config, MODE)
     generate_mesh_from_pos(config)
     print("Finished generating optimized mesh!")

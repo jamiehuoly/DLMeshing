@@ -242,18 +242,14 @@ if __name__ == "__main__":
         runner.clean_logs()
         runner.prepare_compulsory_folders()
 
-        # 4. 网格导入与处理
         runner.import_gmsh(MSH_FILE)
-        runner.scale_mesh(0.001)  # 毫米转米
+        runner.scale_mesh(0.001)  # mm to m
         runner.check_mesh()
 
-        # 5. 修改边界条件
         runner.update_boundary_conditions(CONFIG_FILE)
 
-        # 6. 运行仿真
         runner.run_solver("foamRun")
-        #
-        # # 7. 导出数据
+
         runner.export_vtk()
 
         print("\n🎉 All OpenFOAM tasks completed successfully!")

@@ -8,7 +8,7 @@ import re
 # TEST SCRIPT
 # CASE_PATH = "/PhD/DLMeshing"
 CASE_PATH = "/home/zhuo/phd/test"
-TEMPLATE_PATH = "FoamTemplate"
+TEMPLATE_PATH = "../FoamTemplate"
 MSH_FILE = "elbow.msh"
 CONFIG_FILE = "case_config.json"
 

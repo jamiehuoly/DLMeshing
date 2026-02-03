@@ -224,6 +224,12 @@ class OpenFoamAutomator:
         else:
             print("   ⚠️ VTK directory was not created. Check logs.")
 
+    def clean_logs(self):
+        log_path = os.path.join(self.case_dir, "logs")
+        self._run_cmd(f"zip -r {log_path}/log.zip {log_path}")
+        self._run_cmd(f"rm -rf {log_path}/*.log")
+        print("Done cleaning logs.")
+
 
 # ==========================================
 # 主执行逻辑
@@ -233,7 +239,7 @@ if __name__ == "__main__":
     runner = OpenFoamAutomator(CASE_PATH)
 
     try:
-        # 3. 准备 0 文件夹 (如果是新的仿真)
+        runner.clean_logs()
         runner.prepare_compulsory_folders()
 
         # 4. 网格导入与处理

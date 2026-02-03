@@ -108,6 +108,7 @@ class OpenFoamAutomator:
         """
         self._run_cmd("checkMesh", log_name="checkMesh")
 
+    # ToDo: Not sufficiently tested, may occur problems when testing complex geometries
     def update_boundary_conditions(self, config_file):
         """
         核心功能：根据 JSON 修改 0/U 和 0/p

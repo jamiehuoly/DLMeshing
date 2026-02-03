@@ -16,23 +16,21 @@ CONFIG_FILE = "case_config.json"
 class OpenFoamAutomator:
     def __init__(self, case_dir):
         """
-        初始化自动化工具
-        :param case_dir: OpenFOAM case 的根目录 (包含 0, constant, system)
+        Initialize
+        :param case_dir: root directory of OpenFOAM case (should consist of 0, constant, system)
         """
         self.case_dir = os.path.abspath(case_dir)
         self.log_dir = os.path.join(self.case_dir, "logs")
 
-        # 确保 case 目录存在
         if not os.path.exists(self.case_dir):
             raise FileNotFoundError(f"Case directory not found: {self.case_dir}")
 
-        # 创建日志文件夹
         os.makedirs(self.log_dir, exist_ok=True)
         print(f"🚀 OpenFOAM Automation initialized at: {self.case_dir}")
 
     def _run_cmd(self, cmd_str, log_name=None):
         """
-        执行 Shell 命令的内部封装
+        Execute Shell commands
         """
         print(f"   Wait... Executing: {cmd_str}")
         try:
@@ -85,7 +83,7 @@ class OpenFoamAutomator:
 
     def import_gmsh(self, msh_file):
         """
-        执行 gmshToFoam
+        Execute gmshToFoam
         """
         # 确保 msh 文件路径是绝对路径，或者是相对于 case 的
         if not os.path.isabs(msh_file):
@@ -96,7 +94,7 @@ class OpenFoamAutomator:
 
     def scale_mesh(self, scale_factor=0.001):
         """
-        执行 transformPoints 进行缩放 (解决 mm -> m 问题)
+        Execute transformPoints (mm -> m)
         """
         scale_vec = f"({scale_factor} {scale_factor} {scale_factor})"
         cmd = f"transformPoints 'scale={scale_vec}'"
@@ -104,14 +102,14 @@ class OpenFoamAutomator:
 
     def check_mesh(self):
         """
-        执行 checkMesh
+        Execute checkMesh
         """
         self._run_cmd("checkMesh", log_name="checkMesh")
 
     # ToDo: Not sufficiently tested, may occur problems when testing complex geometries
     def update_boundary_conditions(self, config_file):
         """
-        核心功能：根据 JSON 修改 0/U 和 0/p
+        Modify U and p based on config file
         """
         if not os.path.exists(config_file):
             print(f"⚠️ Config file {config_file} not found. Skipping BC update.")
@@ -124,7 +122,6 @@ class OpenFoamAutomator:
         if not boundaries:
             print("Boundaries in config file is empty!")
 
-        # 我们通常需要修改 U 和 p 两个文件
         for field_name in ["U", "p"]:
             file_path = os.path.join(self.case_dir, "0", field_name)
             if not os.path.exists(file_path):
@@ -132,7 +129,6 @@ class OpenFoamAutomator:
 
             print(f"🔧 Updating {field_name} boundary conditions...")
 
-            # 读取文件内容
             with open(file_path, 'r') as f:
                 content = f.read()
 
@@ -199,26 +195,23 @@ class OpenFoamAutomator:
                 else:
                     print(f"   ⚠️ Patch '{patch_name}' not found in 0/{field_name}")
 
-            # 写回文件
             with open(file_path, 'w') as f:
                 f.write(content)
 
     def run_solver(self, solver_name="foamRun"):
         """
-        运行求解器
+        Run solver
         """
         print(f"🔥 Running Solver: {solver_name} ...")
         self._run_cmd(solver_name, log_name=solver_name)
 
     def export_vtk(self):
         """
-        导出 VTK
+        Export VTK files
         """
-        # OpenFOAM 新版本可能是 foamToVTK，旧版本也通用
         print("💾 Exporting to VTK...")
         self._run_cmd("foamToVTK", log_name="foamToVTK")
 
-        # 结果通常在 VTK/ 文件夹下
         vtk_dir = os.path.join(self.case_dir, "VTK")
         if os.path.exists(vtk_dir):
             print(f"   ✅ VTK files are located in: {vtk_dir}")

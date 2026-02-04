@@ -106,7 +106,7 @@ class OpenFoamAutomator:
         """
         self._run_cmd("checkMesh", log_name="checkMesh")
 
-    def update_boundary_conditions_safe(self, config):
+    def update_boundary_conditions(self, config):
         """
         Use foamDictionary to edit (0/U, 0/p)
         """

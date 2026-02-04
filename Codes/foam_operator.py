@@ -165,8 +165,8 @@ class OpenFoamAutomator:
                 if p_value:
                     self._set_foam_entry(p_file, f"boundaryField.{patch_name}.value", p_value)
                 else:
-                    if self._test_foam_entry(u_file, f"boundaryField.{patch_name}.value"):
-                        self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", default_pvalue)
+                    if self._test_foam_entry(p_file, f"boundaryField.{patch_name}.value"):
+                        self._set_foam_entry(p_file, f"boundaryField.{patch_name}.value", default_pvalue)
 
     def _set_foam_entry(self, file_rel_path, entry, value):
         """
@@ -185,8 +185,8 @@ class OpenFoamAutomator:
         result = subprocess.run(
             cmd,
             cwd=self.case_dir,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
         )
 
         if result.returncode != 0:

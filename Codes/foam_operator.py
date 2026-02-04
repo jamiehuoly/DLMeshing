@@ -104,6 +104,15 @@ class OpenFoamAutomator:
         """
         Execute checkMesh
         """
+        mesh_boundary_file = os.path.join(self.case_dir, "constant", "polyMesh", "boundary")
+        type_pattern = "entry0/wall/type"
+        ptype_pattern = "entry0/wall/physicalType"
+        if self._test_foam_entry(mesh_boundary_file,type_pattern):
+            self._set_foam_entry(mesh_boundary_file, type_pattern, "wall")
+            print("'Wall' type is detected in polyMesh, replacing type 'patch' into 'wall'.")
+        if self._test_foam_entry(mesh_boundary_file,ptype_pattern):
+            self._set_foam_entry(mesh_boundary_file, ptype_pattern, "wall")
+
         self._run_cmd("checkMesh", log_name="checkMesh")
 
     def update_boundary_conditions(self, config):

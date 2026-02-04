@@ -173,7 +173,7 @@ class OpenFoamAutomator:
         Modify settings by using foamDictionary
         """
         # 构造命令: foamDictionary 0/U -entry boundaryField.inlet.type -set fixedValue
-        cmd = f"foamDictionary {file_rel_path} -entry {entry} -set {str(value)}"
+        cmd = f"foamDictionary {file_rel_path} -entry {entry} -set '{str(value)}'"
         self._run_cmd(cmd, log_name="foamDictionary")
 
     def _test_foam_entry(self, file_rel_path, entry):

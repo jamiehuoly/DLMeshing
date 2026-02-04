@@ -21,7 +21,7 @@
         "outlet": {
             "surface_ids": [5],
             "u_type": "zeroGradient",
-            "p_type": "zeroGradient",
+            "p_type": "fixedValue",
             "p_value": "uniform 0"
         },
         "wall": {

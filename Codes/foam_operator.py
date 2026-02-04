@@ -183,11 +183,14 @@ class OpenFoamAutomator:
         cmd = f"foamDictionary {file_rel_path} -entry {entry}"
 
         result = subprocess.run(
-            cmd,
-            cwd=self.case_dir,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL
-        )
+                cmd,
+                shell=True,
+                cwd=self.case_dir,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                check=False
+            )
 
         if result.returncode != 0:
             return False

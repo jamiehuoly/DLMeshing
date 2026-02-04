@@ -106,97 +106,102 @@ class OpenFoamAutomator:
         """
         self._run_cmd("checkMesh", log_name="checkMesh")
 
-    # ToDo: Not sufficiently tested, may occur problems when testing complex geometries
-    def update_boundary_conditions(self, config_file):
+    def update_boundary_conditions_safe(self, config):
         """
-        Modify U and p based on config file
+        Use foamDictionary to edit (0/U, 0/p)
         """
-        if not os.path.exists(config_file):
-            print(f"⚠️ Config file {config_file} not found. Skipping BC update.")
-            return
-
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-
         boundaries = config.get("boundaries", {})
         if not boundaries:
-            print("Boundaries in config file is empty!")
+            return
 
-        for field_name in ["U", "p"]:
-            file_path = os.path.join(self.case_dir, "0", field_name)
-            if not os.path.exists(file_path):
-                continue
+        print("🔧 Updating Boundary Conditions using 'foamDictionary'...")
 
-            print(f"🔧 Updating {field_name} boundary conditions...")
+        for patch_name, settings in boundaries.items():
+            u_file = os.path.join(self.case_dir, "0", "U")
+            if os.path.exists(u_file):
+                # default value
+                u_type = "fixedValue"
+                default_uvalue = "uniform (0 0 0)"
+                u_value = None
 
-            with open(file_path, 'r') as f:
-                content = f.read()
+                if patch_name == "inlet":
+                    u_type = settings.get("u_type", "fixedValue")
+                    vals = settings.get("u_value", [0, 0, 0])
+                    if isinstance(vals, list):
+                        u_value = f"uniform ({vals[0]} {vals[1]} {vals[2]})"
+                    else:
+                        u_value = f"uniform {vals}"
 
-            # 遍历 JSON 中的每个边界 (inlet, outlet...)
-            for patch_name, settings in boundaries.items():
-                # 判断当前处理的是 U 还是 p 的配置
-                # 假设 JSON 结构里可能有区分，或者我们根据 field_name 猜测
-                # 这里做一个简化逻辑：
-                # 如果是 U 文件，且 JSON 里定义了 velocity (或者 type 是 fixedValue)
-                # 这部分逻辑需要根据你的 case_config.json 结构定制
+                elif patch_name == "outlet":
+                    u_type = settings.get("u_type", "zeroGradient")
 
-                # 构造 OpenFOAM 的 Block 正则表达式
-                # 寻找 boundaryField { ... inlet { ... } ... }
-                # 这是一个简化的文本替换逻辑
+                elif patch_name == "wall":
+                    u_type = settings.get("u_type", "noSlip")
 
-                # 1. 构造新的 patch 内容
-                new_patch_block = f"\n    {patch_name}\n    {{\n"
-
-                # 针对 U 场
-                if field_name == "U":
-                    if patch_name == "inlet":
-                        # 特殊处理 inlet
-                        u_type = settings.get("type", "fixedValue")
-                        # 假设 config 里的 value 是 list [x, y, z]
-                        if "value" in settings and isinstance(settings["value"], list):
-                            vx, vy, vz = settings["value"]
-                            u_val = f"uniform ({vx} {vy} {vz})"
-                        else:
-                            u_val = "uniform (0 0 0)"
-
-                        new_patch_block += f"        type            {u_type};\n"
-                        new_patch_block += f"        value           {u_val};\n"
-
-                    elif patch_name == "outlet":
-                        new_patch_block += "        type            zeroGradient;\n"
-
-                    elif patch_name == "wall":
-                        new_patch_block += "        type            noSlip;\n"
-
-                # 针对 p 场
-                elif field_name == "p":
-                    if patch_name == "inlet":
-                        new_patch_block += "        type            zeroGradient;\n"
-                    elif patch_name == "outlet":
-                        new_patch_block += "        type            fixedValue;\n"
-                        new_patch_block += "        value           uniform 0;\n"
-                    elif patch_name == "wall":
-                        new_patch_block += "        type            zeroGradient;\n"
-
-                new_patch_block += "    }"
-
-                # 2. 使用正则表达式替换原有 block
-                # 匹配: patch_name \n { ... }
-                # 注意：OpenFOAM 的花括号嵌套很难完美匹配，这里假设标准格式
-                pattern = r'(\s+' + re.escape(patch_name) + r'\s*\{)[^}]*(\})'
-
-                # 如果找不到这个 patch (比如 gmsh 里的名字和 config 不一致)，跳过
-                if re.search(pattern, content, re.DOTALL):
-                    # 只替换大括号里的内容，或者整个块
-                    # 这里为了简单，我们用正则找到这个块，然后替换它
-                    # 这是一个粗暴但有效的方法：直接替换整个 patch 定义
-                    content = re.sub(pattern, new_patch_block, content, count=1, flags=re.DOTALL)
-                    print(f"   - Updated patch: {patch_name}")
+                # edit 'type' & 'value'
+                self._set_foam_entry(u_file, f"boundaryField.{patch_name}.type", u_type)
+                if u_value:
+                    self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", u_value)
                 else:
-                    print(f"   ⚠️ Patch '{patch_name}' not found in 0/{field_name}")
+                    if self._test_foam_entry(u_file, f"boundaryField.{patch_name}.value"):
+                        self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", default_uvalue)
 
-            with open(file_path, 'w') as f:
-                f.write(content)
+            p_file = os.path.join(self.case_dir, "0", "p")
+            if os.path.exists(p_file):
+                # default value
+                p_type = "zeroGradient"
+                default_pvalue = "uniform 0"
+                p_value = None
+
+                if patch_name == "inlet":
+                    p_type = settings.get("p_type", "zeroGradient")
+                elif patch_name == "outlet":
+                    p_type = settings.get("p_type", "fixedValue")
+                    p_value = settings.get("p_value", default_pvalue)
+                elif patch_name == "wall":
+                    p_type = settings.get("p_type", "zeroGradient")
+
+                self._set_foam_entry(p_file, f"boundaryField.{patch_name}.type", p_type)
+                if p_value:
+                    self._set_foam_entry(p_file, f"boundaryField.{patch_name}.value", p_value)
+                else:
+                    if self._test_foam_entry(u_file, f"boundaryField.{patch_name}.value"):
+                        self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", default_pvalue)
+
+    def _set_foam_entry(self, file_rel_path, entry, value):
+        """
+        Modify settings by using foamDictionary
+        """
+        # 构造命令: foamDictionary 0/U -entry boundaryField.inlet.type -set fixedValue
+        cmd = [
+            "foamDictionary",
+            file_rel_path,
+            "-entry", entry,
+            "-set", str(value)
+        ]
+        self._run_cmd(cmd, log_name="foamDictionary")
+
+    def _test_foam_entry(self, file_rel_path, entry):
+        """
+        Test value exist by using foamDictionary
+        """
+        cmd = [
+            "foamDictionary",
+            file_rel_path,
+            "-entry", entry
+        ]
+
+        result = subprocess.run(
+            cmd,
+            cwd=self.case_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        if result.returncode != 0:
+            return False
+
+        return True
 
     def run_solver(self, solver_name="foamRun"):
         """

@@ -50,7 +50,7 @@ runner.import_gmsh(config["output_coarse_mesh_file"])
 runner.scale_mesh(0.001)  # mm to m
 runner.check_mesh()
 
-runner.update_boundary_conditions(CONFIG_FILE)
+runner.update_boundary_conditions(config)
 
 runner.run_solver("foamRun")
 runner.export_vtk()

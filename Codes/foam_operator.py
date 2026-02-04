@@ -139,12 +139,12 @@ class OpenFoamAutomator:
                     u_type = settings.get("u_type", "noSlip")
 
                 # edit 'type' & 'value'
-                self._set_foam_entry(u_file, f"boundaryField.{patch_name}.type", u_type)
+                self._set_foam_entry(u_file, f"boundaryField/{patch_name}/type", u_type)
                 if u_value:
-                    self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", u_value)
+                    self._set_foam_entry(u_file, f"boundaryField/{patch_name}/value", u_value)
                 else:
-                    if self._test_foam_entry(u_file, f"boundaryField.{patch_name}.value"):
-                        self._set_foam_entry(u_file, f"boundaryField.{patch_name}.value", default_uvalue)
+                    if self._test_foam_entry(u_file, f"boundaryField/{patch_name}/value"):
+                        self._set_foam_entry(u_file, f"boundaryField/{patch_name}/value", default_uvalue)
 
             p_file = os.path.join(self.case_dir, "0", "p")
             if os.path.exists(p_file):
@@ -161,18 +161,18 @@ class OpenFoamAutomator:
                 elif patch_name == "wall":
                     p_type = settings.get("p_type", "zeroGradient")
 
-                self._set_foam_entry(p_file, f"boundaryField.{patch_name}.type", p_type)
+                self._set_foam_entry(p_file, f"boundaryField/{patch_name}/type", p_type)
                 if p_value:
-                    self._set_foam_entry(p_file, f"boundaryField.{patch_name}.value", p_value)
+                    self._set_foam_entry(p_file, f"boundaryField/{patch_name}/value", p_value)
                 else:
-                    if self._test_foam_entry(p_file, f"boundaryField.{patch_name}.value"):
-                        self._set_foam_entry(p_file, f"boundaryField.{patch_name}.value", default_pvalue)
+                    if self._test_foam_entry(p_file, f"boundaryField/{patch_name}/value"):
+                        self._set_foam_entry(p_file, f"boundaryField/{patch_name}/value", default_pvalue)
 
     def _set_foam_entry(self, file_rel_path, entry, value):
         """
         Modify settings by using foamDictionary
         """
-        # 构造命令: foamDictionary 0/U -entry boundaryField.inlet.type -set fixedValue
+        # 构造命令: foamDictionary 0/U -entry boundaryField/inlet/type -set fixedValue
         cmd = f"foamDictionary {file_rel_path} -entry {entry} -set '{str(value)}'"
         self._run_cmd(cmd, log_name="foamDictionary")
 

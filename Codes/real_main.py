@@ -109,7 +109,7 @@ if MODE == "train":
         os.makedirs(model_save_directory)
     torch.save(model.state_dict(), model_save_path)
     print(f"\nModel saved to: ./{model_save_path}")
-    print("Train finished! Total time used:", time.time() - time_start)
+    print(f"Train finished! Total time used: {time.time() - time_start:.2f} seconds.")
 
 else:
     # Inference
@@ -118,7 +118,7 @@ else:
     vtk_file = utils.get_latest_vtk(vtk_path_pattern)
     generate_size_field(vtk_file, config, MODE)
     generate_mesh_from_pos(config)
-    print("Finished generating optimized mesh! Total time used:", time.time() - time_start)
+    print(f"Finished generating optimized mesh! Total time used: {time.time() - time_start:.2f} seconds.")
 
 
 

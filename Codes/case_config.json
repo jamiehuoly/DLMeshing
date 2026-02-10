@@ -7,13 +7,13 @@
     "output_optimized_mesh_file": "default_optimized_mesh.msh",
     "boundaries": {
         "inlet": {
-            "surface_ids": [2],
+            "surface_ids": [5],
             "u_type": "fixedValue",
             "u_value": [0, 0, 1],
             "p_type": "zeroGradient"
         },
         "outlet": {
-            "surface_ids": [5],
+            "surface_ids": [2],
             "u_type": "zeroGradient",
             "p_type": "fixedValue",
             "p_value": "uniform 0"

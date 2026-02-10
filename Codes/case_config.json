@@ -1,4 +1,5 @@
 {
+    "TIPS": "IF YOU DO NOT KNOW EXACTLY THE KEY MEANS, PLEASE REMAIN AS IT IS!",
     "mode": "manual",
     "work_dir": "case",
     "geometry_file": "elbow.step",

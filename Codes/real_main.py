@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+
 import torch
 import utils
 from foam_operator import OpenFoamAutomator
@@ -31,6 +33,8 @@ if len(sys.argv) > 1:
 else:
     # default setting
     MODE = "inference"
+
+time_start = time.time()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 config = utils.get_config_json(CONFIG_FILE)
@@ -105,6 +109,7 @@ if MODE == "train":
         os.makedirs(model_save_directory)
     torch.save(model.state_dict(), model_save_path)
     print(f"\nModel saved to: ./{model_save_path}")
+    print("Training finished! Total time used:", time.time() - time_start)
 
 else:
     # Inference
@@ -113,7 +118,7 @@ else:
     vtk_file = utils.get_latest_vtk(vtk_path_pattern)
     generate_size_field(vtk_file, config, MODE)
     generate_mesh_from_pos(config)
-    print("Finished generating optimized mesh!")
+    print("Finished generating optimized mesh! Total time used:", time.time() - time_start)
 
 
 

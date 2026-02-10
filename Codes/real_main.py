@@ -109,7 +109,7 @@ if MODE == "train":
         os.makedirs(model_save_directory)
     torch.save(model.state_dict(), model_save_path)
     print(f"\nModel saved to: ./{model_save_path}")
-    print(f"Train finished! Total time used: {time.time() - time_start:.2f} seconds.")
+    print(f"Train finished! Total time used: {(time.time() - time_start) / 60:.2f} minutes.")
 
 else:
     # Inference

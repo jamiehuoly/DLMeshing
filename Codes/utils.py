@@ -319,7 +319,7 @@ def process_vtk_to_graph(vtk_path, mode):
     edges = mesh.extract_all_edges()
     # edges.lines 的存储格式非常奇葩，是 VTK 的标准：
     # [2, 点A, 点B, 2, 点C, 点D, ...]
-    # 这里的 '2' 代表这条线由2个点组成。我们需要把这个 '2' 扔掉。
+    # 这里的 '2' 代表这条线由2个点组成。需要把这个 '2' 扔掉。
     # .reshape(-1, 3): 把它变成 N行3列 -> [[2, A, B], [2, C, D], ...]
     # [:, 1:]: 取所有行，但扔掉第0列(那个2) -> [[A, B], [C, D], ...
     lines = edges.lines.reshape(-1, 3)[:, 1:]
